@@ -1,0 +1,44 @@
+.profile-container {
+    margin-left: 240px;
+    margin-top: 80px;
+    display: flex;
+    justify-content: center;
+    padding: 30px;
+}
+
+.profile-card {
+    width: 700px;
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+.profile-card h1 {
+    text-align: center;
+    color: #1976d2;
+    margin-bottom: 20px;
+}
+
+.profile-card hr {
+    margin-bottom: 25px;
+}
+
+.profile-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.profile-row span {
+    font-weight: bold;
+    color: #555;
+}
+
+.profile-row p {
+    margin: 0;
+    color: #222;
+    font-size: 16px;
+}

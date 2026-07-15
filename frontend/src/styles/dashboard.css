@@ -1,0 +1,49 @@
+.dashboard{
+
+    margin-left:250px;
+
+    margin-top:80px;
+
+    padding:30px;
+
+    background:#f5f7fb;
+
+    min-height:100vh;
+
+}
+
+.cards{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:25px;
+
+}
+
+.card{
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:10px;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+
+}
+
+.card h3{
+
+    color:#666;
+
+    margin-bottom:15px;
+
+}
+
+.card h1{
+
+    color:#1976d2;
+
+}
