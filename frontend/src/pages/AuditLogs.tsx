@@ -54,6 +54,7 @@ function AuditLogs() {
                             <th>Timestamp</th>
                             <th>User</th>
                             <th>Action</th>
+                            <th>Entity</th>
                             <th>IP Address</th>
                             <th>Browser</th>
 
@@ -72,6 +73,8 @@ function AuditLogs() {
                                 <td>{log.user_name}</td>
 
                                 <td>{log.action}</td>
+
+                                <td>{log.entity_name || "-"}</td>
 
                                 <td>{log.ip_address || "-"}</td>
 

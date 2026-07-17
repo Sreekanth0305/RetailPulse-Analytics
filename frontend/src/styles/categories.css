@@ -1,0 +1,71 @@
+.categories{
+
+    margin-left:260px;
+    margin-top:80px;
+    padding:30px;
+
+}
+
+.category-header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+
+}
+
+.add-btn{
+
+    background:#1976d2;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    cursor:pointer;
+    border-radius:5px;
+
+}
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+
+}
+
+table th,
+table td{
+
+    border:1px solid #ddd;
+    padding:12px;
+    text-align:left;
+
+}
+
+table th{
+
+    background:#1976d2;
+    color:white;
+
+}
+
+table button{
+
+    margin-right:10px;
+    padding:5px 10px;
+    cursor:pointer;
+
+}
+
+.category-header input{
+
+    width:250px;
+
+    padding:10px;
+
+    border:1px solid #ccc;
+
+    border-radius:5px;
+
+}

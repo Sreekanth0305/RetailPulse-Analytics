@@ -5,6 +5,8 @@ import Dashboard from "../pages/Dashboard";
 import RegisterCompany from "../pages/RegisterCompany";
 import Profile from "../pages/Profile";
 import AuditLogs from "../pages/AuditLogs";
+import Categories from "../pages/Categories";
+import Products from "../pages/Products";
 
 export default function AppRoutes() {
   return (
@@ -15,6 +17,8 @@ export default function AppRoutes() {
         <Route path="/register" element={<RegisterCompany />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/audit-logs" element={<AuditLogs />}/>
+        <Route path="/categories" element={<Categories />}/>
+        <Route path="/products" element={<Products />} />
       </Routes>
     </BrowserRouter>
   );

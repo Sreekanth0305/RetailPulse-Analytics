@@ -2,6 +2,8 @@ import {
   Dashboard,
   People,
   Business,
+  Category,
+  Inventory,
   Analytics,
   Notifications,
   Settings,
@@ -50,6 +52,22 @@ function Sidebar() {
         <li>
           <Business />
           <span>Companies</span>
+        </li>
+
+        <li onClick={() => navigate("/categories")}>
+
+            <Category />
+        
+            <span>Categories</span>
+        
+        </li>
+
+        <li onClick={() => navigate("/products")}>
+
+            <Inventory />
+        
+            <span>Products</span>
+        
         </li>
 
         <li>
