@@ -6,6 +6,8 @@ from app.config.database import Base, engine
 from app.models import Company, User, RefreshToken, AuditLog
 
 from app.models.employee import Employee
+from app.models.category import Category
+from app.models.product import Product
 
 from app.routes.company_routes import router as company_router
 from app.routes.auth_routes import router as auth_router
@@ -13,6 +15,8 @@ from app.routes.user_routes import router as user_router
 from app.routes.employee_routes import router as employee_router
 from app.routes.dashboard_routes import router as dashboard_router
 from app.routes.audit_routes import router as audit_router
+from app.routes.category_routes import router as category_router
+from app.routes.product_routes import router as product_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -24,7 +28,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173"
+        "http://localhost:5174"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -45,3 +49,5 @@ app.include_router(user_router)
 app.include_router(employee_router)
 app.include_router(dashboard_router)
 app.include_router(audit_router)
+app.include_router(category_router)
+app.include_router(product_router)

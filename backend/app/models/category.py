@@ -11,8 +11,8 @@ from datetime import datetime
 from app.config.database import Base
 
 
-class AuditLog(Base):
-    __tablename__ = "audit_logs"
+class Category(Base):
+    __tablename__ = "categories"
 
     id = Column(
         Integer,
@@ -26,28 +26,18 @@ class AuditLog(Base):
         nullable=False
     )
 
-    user_id = Column(
-        Integer,
-        ForeignKey("users.id"),
-        nullable=False
-    )
-
-    action = Column(
+    name = Column(
         String(100),
         nullable=False
     )
 
-    entity_name = Column(
-        String(255),
-        nullable=True
-    )
-
-    ip_address = Column(
-        String(50)
-    )
-
-    browser = Column(
+    description = Column(
         String(255)
+    )
+
+    status = Column(
+        String(20),
+        default="Active"
     )
 
     created_at = Column(
@@ -55,12 +45,19 @@ class AuditLog(Base):
         default=datetime.utcnow
     )
 
-    company = relationship(
-        "Company",
-        back_populates="audit_logs"
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
     )
 
-    user = relationship(
-        "User",
-        back_populates="audit_logs"
+    company = relationship(
+        "Company",
+        back_populates="categories"
+    )
+
+    products = relationship(
+        "Product",
+        back_populates="category",
+        cascade="all, delete-orphan"
     )

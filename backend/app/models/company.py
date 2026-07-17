@@ -28,8 +28,26 @@ class Company(Base):
         cascade="all, delete-orphan"
     )
 
+    # employees = relationship(
+    #     "Employee",
+    #     back_populates="company"
+    #     cascade="all, delete-orphan"
+    # )
+
     audit_logs = relationship(
         "AuditLog",
+        back_populates="company",
+        cascade="all, delete-orphan"
+    )
+
+    categories = relationship(
+    "Category",
+    back_populates="company",
+    cascade="all, delete-orphan"
+    )
+    
+    products = relationship(
+        "Product",
         back_populates="company",
         cascade="all, delete-orphan"
     )
