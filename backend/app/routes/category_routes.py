@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.config.database import get_db
@@ -35,6 +35,7 @@ router = APIRouter(
     status_code=201
 )
 def create_category_api(
+    request: Request,
     category: CategoryCreate,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -44,7 +45,8 @@ def create_category_api(
         db,
         current_user.company_id,
         current_user.id,
-        category
+        category,
+        request
     )
 
 
@@ -111,6 +113,7 @@ def get_category_api(
     response_model=CategoryResponse
 )
 def update_category_api(
+    request: Request,
     category_id: int,
     category: CategoryUpdate,
     current_user=Depends(get_current_user),
@@ -122,7 +125,8 @@ def update_category_api(
         current_user.company_id,
         current_user.id,
         category_id,
-        category
+        category,
+        request
     )
 
 
@@ -131,6 +135,7 @@ def update_category_api(
 # -----------------------------
 @router.delete("/{category_id}")
 def delete_category_api(
+    request: Request,
     category_id: int,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -140,5 +145,6 @@ def delete_category_api(
         db,
         current_user.company_id,
         current_user.id,
-        category_id
+        category_id,
+        request
     )

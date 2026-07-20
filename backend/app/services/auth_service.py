@@ -68,7 +68,8 @@ def generate_tokens(db: Session, user: User):
 
 def login_user(
     db: Session,
-    credentials: OAuth2PasswordRequestForm
+    credentials: OAuth2PasswordRequestForm,
+    request: Request
 ):
 
     user = authenticate_user(
@@ -89,10 +90,12 @@ def login_user(
     db.refresh(user)
 
     create_audit_log(
-    db=db,
-    company_id=user.company_id,
-    user_id=user.id,
-    action="User Login"
+        db=db,
+        company_id=user.company_id,
+        user_id=user.id,
+        action="User Login",
+        ip_address=request.client.host,
+        browser=request.headers.get("user-agent")
     )
     
     return generate_tokens(db, user)
@@ -192,4 +195,17 @@ def refresh_access_token(
     return {
         "access_token": access_token,
         "token_type": "Bearer"
+    }
+
+def get_current_user_profile(user: User):
+
+    return {
+
+        "id": user.id,
+        "company_id": user.company_id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role,
+        "status": user.status
+
     }

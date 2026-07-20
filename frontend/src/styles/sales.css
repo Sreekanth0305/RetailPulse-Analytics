@@ -1,0 +1,303 @@
+/* =====================================================
+   SALES MODULE
+===================================================== */
+
+.sales-container,
+.sale-form-container,
+.sale-details-container {
+    margin-left: 250px;   
+    margin-top: 80px;     
+    padding: 24px;
+    background: #f5f7fb;
+    min-height: calc(100vh - 80px);
+    box-sizing: border-box;
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.sales-header,
+.sale-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sales-header h2,
+.sale-details-header h2 {
+    margin: 0;
+    color: #1f2937;
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+button {
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: 0.3s;
+}
+
+.sales-header button,
+.sale-form-container button[type="submit"] {
+    background: #2563eb;
+    color: white;
+    padding: 10px 18px;
+    font-weight: 600;
+}
+
+.sales-header button:hover,
+.sale-form-container button[type="submit"]:hover {
+    background: #1d4ed8;
+}
+
+.sales-table button {
+    padding: 6px 12px;
+    margin-right: 6px;
+    background: #e5e7eb;
+}
+
+.sales-table button:hover {
+    background: #d1d5db;
+}
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+.sales-search {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.sales-search input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+}
+
+.sales-search button {
+    background: #2563eb;
+    color: white;
+    padding: 10px 20px;
+}
+
+/* =====================================================
+   FILTERS
+===================================================== */
+
+.sales-filters {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.sales-filters input,
+.sales-filters select {
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    min-width: 180px;
+}
+
+.sales-filters button {
+    background: #16a34a;
+    color: white;
+    padding: 10px 20px;
+}
+
+/* =====================================================
+   SORT
+===================================================== */
+
+.sales-sort {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.sales-sort select {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+}
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.sales-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.sales-table th {
+    background: #2563eb;
+    color: white;
+    padding: 14px;
+    text-align: left;
+}
+
+.sales-table td {
+    padding: 14px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.sales-table tr:hover {
+    background: #f9fafb;
+}
+
+/* =====================================================
+   SALE FORM
+===================================================== */
+
+.sale-form-container form {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+}
+
+.sale-form-container h3 {
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.sale-form-container input,
+.sale-form-container select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    margin-bottom: 18px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+}
+
+.sale-form-container table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.sale-form-container table th {
+    background: #2563eb;
+    color: white;
+    padding: 10px;
+}
+
+.sale-form-container table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.sale-form-container h2 {
+    margin-top: 20px;
+    color: #2563eb;
+}
+
+/* =====================================================
+   SALE DETAILS
+===================================================== */
+
+.sale-details-card {
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+}
+
+.sale-details-card h3 {
+    margin-top: 25px;
+    color: #2563eb;
+}
+
+.sale-details-card table {
+    width: 100%;
+    margin-top: 15px;
+    border-collapse: collapse;
+}
+
+.sale-details-card table th {
+    background: #2563eb;
+    color: white;
+    padding: 12px;
+}
+
+.sale-details-card table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+}
+
+.sale-summary {
+    margin-top: 30px;
+    background: #f8fafc;
+    padding: 18px;
+    border-radius: 8px;
+}
+
+.sale-summary h3 {
+    margin: 0 0 10px;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 992px) {
+
+    .sales-search {
+        flex-direction: column;
+    }
+
+    .sales-filters {
+        flex-direction: column;
+    }
+
+    .sales-sort {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sales-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .sale-form-container table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .sale-details-card table {
+        display: block;
+        overflow-x: auto;
+    }
+
+}
+
+@media (max-width: 576px) {
+
+    .sales-container,
+    .sale-form-container,
+    .sale-details-container {
+        padding: 15px;
+    }
+
+    .sales-header,
+    .sale-details-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+}

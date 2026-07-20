@@ -10,7 +10,6 @@ import {
     filterProduct,
     activateProduct,
     deactivateProduct,
-    getDashboardSummary,
     sortProduct
 } from "../services/productService";
 
@@ -27,18 +26,6 @@ import "../styles/products.css";
 function Products() {
 
     const [products, setProducts] = useState<any[]>([]);
-
-    const [summary, setSummary] = useState({
-
-    total_products: 0,
-
-    active_products: 0,
-
-    inactive_products: 0,
-
-    total_categories: 0
-
-});
 
     const [open, setOpen] = useState(false);
 
@@ -74,23 +61,6 @@ function Products() {
 
     };
 
-    const loadSummary = async () => {
-
-        try {
-    
-            const response = await getDashboardSummary();
-    
-            setSummary(response.data);
-    
-        }
-    
-        catch (error) {
-    
-            console.log(error);
-    
-        }
-    
-    };
 
     const loadCategories = async () => {
 
@@ -116,7 +86,6 @@ function Products() {
 
         loadCategories();
 
-         loadSummary();
 
     }, []);
 
@@ -324,42 +293,6 @@ const handleDeactivate = async (
                         Product Management
 
                     </h2>
-
-                    <div className="summary-cards">
-
-                        <div className="summary-card">
-                    
-                            <h3>Total Products</h3>
-                    
-                            <h2>{summary.total_products}</h2>
-                    
-                        </div>
-                    
-                        <div className="summary-card">
-                    
-                            <h3>Active Products</h3>
-                    
-                            <h2>{summary.active_products}</h2>
-                    
-                        </div>
-                    
-                        <div className="summary-card">
-                    
-                            <h3>Inactive Products</h3>
-                    
-                            <h2>{summary.inactive_products}</h2>
-                    
-                        </div>
-                    
-                        <div className="summary-card">
-                    
-                            <h3>Total Categories</h3>
-                    
-                            <h2>{summary.total_categories}</h2>
-                    
-                        </div>
-                    
-                    </div>
 
                     <div className="products-header"> 
 
@@ -606,7 +539,7 @@ const handleDeactivate = async (
                                     <td>
 
                                         <button
-                                    
+                                            className="edit-btn"
                                             onClick={() => {
                                     
                                                 setSelectedProduct(product);
@@ -628,7 +561,7 @@ const handleDeactivate = async (
                                                 ?
                                     
                                                 <button
-                                    
+                                                    className="deactivate-btn"
                                                     onClick={() =>
                                     
                                                         handleDeactivate(product.id)
@@ -644,7 +577,7 @@ const handleDeactivate = async (
                                                 :
                                     
                                                 <button
-                                    
+                                                    className="activate-btn"
                                                     onClick={() =>
                                     
                                                         handleActivate(product.id)
@@ -660,7 +593,7 @@ const handleDeactivate = async (
                                         }
                                     
                                         <button
-                                    
+                                            className="delete-btn"
                                             onClick={() =>
                                     
                                                 handleDelete(product.id)

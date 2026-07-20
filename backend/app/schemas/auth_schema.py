@@ -11,3 +11,15 @@ class ChangePasswordRequest(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
+
+class UserProfileResponse(BaseModel):
+
+    id: int
+    company_id: int
+    name: str
+    email: EmailStr
+    role: str
+    status: str
+
+    class Config:
+        from_attributes = True

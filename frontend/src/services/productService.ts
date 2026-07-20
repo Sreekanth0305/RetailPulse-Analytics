@@ -198,29 +198,6 @@ export const deactivateProduct = (
 
     );
 
-};// -----------------------------
-// Dashboard Summary
-// -----------------------------
-export const getDashboardSummary = () => {
-
-    return axios.get(
-
-        "/products/summary",
-
-        {
-
-            headers: {
-
-                Authorization:
-
-                    `Bearer ${localStorage.getItem("access_token")}`
-
-            }
-
-        }
-
-    );
-
 };
 
 export const sortProduct = (

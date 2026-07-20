@@ -20,6 +20,8 @@ class Company(Base):
 
     phone = Column(String(20), nullable=False)
 
+    role = Column(String(50), nullable=False)
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     users = relationship(

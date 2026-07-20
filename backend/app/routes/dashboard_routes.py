@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from app.config.database import get_db
 from app.config.jwt import get_current_user
 
+from app.schemas.dashboard_schema import DashboardResponse
+
 from app.services.dashboard_service import (
     get_dashboard_data
 )
@@ -14,7 +16,10 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get(
+    "/",
+    response_model=DashboardResponse
+)
 def dashboard(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)

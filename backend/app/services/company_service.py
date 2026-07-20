@@ -66,6 +66,7 @@ def register_company(db: Session, company: CompanyCreateSchema):
         email=company.email,
         address=company.address,
         phone=company.phone,
+        role=company.role
     )
 
     db.add(db_company)
@@ -81,7 +82,7 @@ def register_company(db: Session, company: CompanyCreateSchema):
         name=company.admin_name,
         email=company.admin_email,
         password=hash_password(company.admin_password),
-        role="Company Admin",
+        role=company.role,
         status="Active"
     )
 

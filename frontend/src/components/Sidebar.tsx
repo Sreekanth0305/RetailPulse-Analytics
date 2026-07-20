@@ -9,10 +9,13 @@ import {
   Settings,
   Logout,
   Person,
-  History
+  History,
+  PointOfSale
 } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
+
+import { logout as logoutUser } from "../services/authService";
 
 import "../styles/sidebar.css";
 
@@ -20,7 +23,17 @@ function Sidebar() {
 
   const navigate = useNavigate();
 
-  const logout = () => {
+  const logout = async () => {
+
+    try {
+
+        await logoutUser();
+
+    } catch (error) {
+
+        console.log(error);
+
+    }
 
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
@@ -70,14 +83,25 @@ function Sidebar() {
         
         </li>
 
+        <li onClick={() => navigate("/sales")}>
+
+            <PointOfSale />
+        
+            <span>Sales</span>
+        
+        </li>
+
         <li>
           <Analytics />
           <span>Analytics</span>
         </li>
 
-        <li>
+        <li onClick={() => navigate("/notifications")}>
+
           <Notifications />
+        
           <span>Notifications</span>
+        
         </li>
 
         <li onClick={() => navigate("/profile")}>

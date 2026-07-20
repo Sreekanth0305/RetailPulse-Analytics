@@ -3,11 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.database import Base, engine
 
-from app.models import Company, User, RefreshToken, AuditLog
+from app.models import Company, User, RefreshToken, AuditLog, Notification
 
 from app.models.employee import Employee
 from app.models.category import Category
 from app.models.product import Product
+from app.models.sale import Sale
+from app.models.sale_item import SaleItem
 
 from app.routes.company_routes import router as company_router
 from app.routes.auth_routes import router as auth_router
@@ -17,6 +19,8 @@ from app.routes.dashboard_routes import router as dashboard_router
 from app.routes.audit_routes import router as audit_router
 from app.routes.category_routes import router as category_router
 from app.routes.product_routes import router as product_router
+from app.routes.sale_routes import router as sale_router
+from app.routes.notification_routes import router as notification_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -51,3 +55,5 @@ app.include_router(dashboard_router)
 app.include_router(audit_router)
 app.include_router(category_router)
 app.include_router(product_router)
+app.include_router(sale_router)
+app.include_router(notification_router)

@@ -224,7 +224,7 @@ function Categories() {
                                     <td>
 
                                         <button
-                                        
+                                           className="edit-btn"
                                            onClick={() =>
    
                                                 handleEdit(category)
@@ -238,7 +238,7 @@ function Categories() {
                                         </button>
 
                                         <button
-                                        
+                                            className="delete-btn"
                                             onClick={() =>
 
                                                 handleDelete(category.id)

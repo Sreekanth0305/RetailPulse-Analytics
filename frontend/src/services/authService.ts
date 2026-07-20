@@ -12,3 +12,35 @@ export const login = (email: string, password: string) => {
     },
   });
 };
+
+export const logout = () => {
+
+    const token = localStorage.getItem("access_token");
+
+    return axios.post(
+        "/auth/logout",
+        {},
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
+
+};
+
+export const getCurrentUser = () => {
+
+    const token = localStorage.getItem("access_token");
+
+    return axios.get("/auth/me", {
+
+        headers: {
+
+            Authorization: `Bearer ${token}`
+
+        }
+
+    });
+
+};

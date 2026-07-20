@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.config.database import get_db
@@ -21,7 +21,6 @@ from app.services.product_service import (
     filter_products,
     activate_product,
     deactivate_product,
-    dashboard_summary,
     sort_products
 )
 
@@ -40,6 +39,7 @@ router = APIRouter(
     status_code=201
 )
 def create_product_api(
+    request: Request,
     product: ProductCreate,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -48,7 +48,9 @@ def create_product_api(
     return create_product(
         db,
         current_user.company_id,
-        product
+        current_user.id,
+        product,
+        request
     )
 
 
@@ -107,26 +109,6 @@ def filter_product(
         brand
     )
 
-# -----------------------------
-# Dashboard Summary
-# -----------------------------
-@router.get("/summary")
-def get_dashboard_summary(
-
-    current_user=Depends(get_current_user),
-
-    db: Session = Depends(get_db)
-
-):
-
-    return dashboard_summary(
-
-        db,
-
-        current_user.company_id
-
-    )
-
 @router.get("/sort")
 def sort_product(
     sort_by: str,
@@ -169,6 +151,7 @@ def get_product_api(
     response_model=ProductResponse
 )
 def update_product_api(
+    request: Request,
     product_id: int,
     product: ProductUpdate,
     current_user=Depends(get_current_user),
@@ -180,7 +163,8 @@ def update_product_api(
         current_user.company_id,
         current_user.id,
         product_id,
-        product
+        product,
+        request
     )
 
 
@@ -189,6 +173,7 @@ def update_product_api(
 # -----------------------------
 @router.delete("/{product_id}")
 def delete_product_api(
+    request: Request,
     product_id: int,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -198,7 +183,8 @@ def delete_product_api(
         db,
         current_user.company_id,
         current_user.id,
-        product_id
+        product_id,
+        request
     )
 
 # -----------------------------
@@ -209,6 +195,7 @@ def delete_product_api(
     response_model=ProductResponse
 )
 def activate_product_api(
+    request: Request,
     product_id: int,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -218,7 +205,8 @@ def activate_product_api(
         db,
         current_user.company_id,
         current_user.id,
-        product_id
+        product_id,
+        request
     )
 
 
@@ -230,6 +218,7 @@ def activate_product_api(
     response_model=ProductResponse
 )
 def deactivate_product_api(
+    request: Request,
     product_id: int,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -239,5 +228,6 @@ def deactivate_product_api(
         db,
         current_user.company_id,
         current_user.id,
-        product_id
+        product_id,
+        request
     )

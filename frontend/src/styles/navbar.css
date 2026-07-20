@@ -53,3 +53,17 @@
     opacity:0.8;
 
 }
+
+.navbar-right svg {
+
+    cursor: pointer;
+
+}
+
+.MuiBadge-badge {
+
+    font-size: 10px;
+
+    font-weight: bold;
+
+}

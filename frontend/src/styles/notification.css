@@ -1,0 +1,224 @@
+/* =====================================================
+   NOTIFICATIONS PAGE
+===================================================== */
+
+.notifications {
+    margin-left: 250px;
+    margin-top: 70px;
+    padding: 25px;
+    background: #f5f7fb;
+    min-height: calc(100vh - 70px);
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.notification-header h2 {
+    color: #1f2937;
+    margin: 0;
+}
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+.empty {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    text-align: center;
+    color: gray;
+    font-size: 18px;
+}
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.notification-card {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    background: white;
+
+    margin-bottom: 15px;
+
+    padding: 18px;
+
+    border-radius: 10px;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+    transition: .3s;
+
+}
+
+.notification-card:hover{
+
+    transform: translateY(-2px);
+
+}
+
+.notification-content{
+
+    flex:1;
+
+}
+
+.notification-content h3{
+
+    margin:0;
+
+    color:#2563eb;
+
+}
+
+.notification-content p{
+
+    margin:10px 0;
+
+    color:#444;
+
+}
+
+.notification-content small{
+
+    color:gray;
+
+}
+
+/* =====================================================
+   READ / UNREAD
+===================================================== */
+
+.unread{
+
+    border-left:6px solid #2563eb;
+
+}
+
+.read{
+
+    border-left:6px solid #d1d5db;
+
+    opacity:.75;
+
+}
+
+/* =====================================================
+   ACTION BUTTONS
+===================================================== */
+
+.notification-actions{
+
+    display:flex;
+
+    gap:10px;
+
+}
+
+.read-btn{
+
+    background:#16a34a;
+
+    color:white;
+
+    border:none;
+
+    padding:8px 14px;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+}
+
+.read-btn:hover{
+
+    background:#15803d;
+
+}
+
+.delete-btn{
+
+    background:#dc2626;
+
+    color:white;
+
+    border:none;
+
+    padding:8px 14px;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+}
+
+.delete-btn:hover{
+
+    background:#b91c1c;
+
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width:992px){
+
+    .notifications{
+
+        margin-left:0;
+
+    }
+
+    .notification-card{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:15px;
+
+    }
+
+    .notification-actions{
+
+        width:100%;
+
+        justify-content:flex-end;
+
+    }
+
+}
+
+@media(max-width:576px){
+
+    .notification-actions{
+
+        flex-direction:column;
+
+        width:100%;
+
+    }
+
+    .notification-actions button{
+
+        width:100%;
+
+    }
+
+}

@@ -6,6 +6,7 @@ import {
   Button,
   Paper,
   TextField,
+  MenuItem,
   Typography,
   Grid
 } from "@mui/material";
@@ -22,6 +23,7 @@ function RegisterCompany() {
   const [industry, setIndustry] = useState("");
   const [companyEmail, setCompanyEmail] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
+  const [role, setRole] = useState("");
   const [address, setAddress] = useState("");
 
   const [adminName, setAdminName] = useState("");
@@ -140,6 +142,36 @@ function RegisterCompany() {
               onChange={(e)=>setCompanyPhone(e.target.value)}
             />
 
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 6 }}>
+
+            <TextField
+              select
+              fullWidth
+              label="Role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            >
+          
+              <MenuItem value="Company Admin">
+                Company Admin
+              </MenuItem>
+          
+              <MenuItem value="Analyst">
+                Analyst
+              </MenuItem>
+          
+              <MenuItem value="Viewer">
+                Viewer
+              </MenuItem>
+          
+              <MenuItem value="Super Admin">
+                Super Admin
+              </MenuItem>
+          
+            </TextField>
+          
           </Grid>
 
           <Grid size={12}>

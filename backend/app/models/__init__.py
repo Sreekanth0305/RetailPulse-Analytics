@@ -2,3 +2,9 @@ from app.models.company import Company
 from app.models.user import User
 from app.models.refresh_token import RefreshToken
 from app.models.audit_log import AuditLog
+from app.models.employee import Employee
+from app.models.category import Category
+from app.models.product import Product
+from app.models.sale import Sale
+from app.models.sale_item import SaleItem
+from app.models.notification import Notification

@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.models.product import Product
@@ -7,8 +7,6 @@ from app.schemas.product_schema import (
     ProductCreate,
     ProductUpdate
 )
-
-from app.models.category import Category
 
 from app.services.audit_service import create_audit_log
 
@@ -50,7 +48,8 @@ def create_product(
     db: Session,
     company_id: int,
     user_id: int,
-    product: ProductCreate
+    product: ProductCreate,
+    request: Request
 ):
 
     # SKU Validation
@@ -130,7 +129,9 @@ def create_product(
     company_id=company_id,
     user_id=user_id,
     action="Product Created",
-    entity_name=db_product.name
+    entity_name=db_product.name,
+    ip_address=request.client.host,
+    browser=request.headers.get("user-agent")
     )
 
     return db_product
@@ -241,7 +242,8 @@ def update_product(
     company_id: int,
     user_id: int,
     product_id: int,
-    data: ProductUpdate
+    data: ProductUpdate,
+    request: Request
 ):
 
     product = get_product(
@@ -269,7 +271,9 @@ def update_product(
     company_id=company_id,
     user_id=user_id,
     action="Product Updated",
-    entity_name=product.name
+    entity_name=product.name,
+    ip_address=request.client.host,
+    browser=request.headers.get("user-agent")
     )
 
     return product
@@ -282,7 +286,8 @@ def delete_product(
     db: Session,
     company_id: int,
     user_id: int,
-    product_id: int
+    product_id: int,
+    request: Request
 ):
 
     product = get_product(
@@ -305,7 +310,11 @@ def delete_product(
 
     action="Product Deleted",
 
-    entity_name=product_name
+    entity_name=product_name,
+
+    ip_address=request.client.host,
+
+    browser=request.headers.get("user-agent")
 
     )
 
@@ -320,7 +329,8 @@ def activate_product(
     db: Session,
     company_id: int,
     user_id: int,
-    product_id: int
+    product_id: int,
+    request: Request
 ):
 
     product = get_product(
@@ -344,7 +354,11 @@ def activate_product(
 
     action="Product Activated",
 
-    entity_name=product.name
+    entity_name=product.name,
+
+    ip_address=request.client.host,
+
+    browser=request.headers.get("user-agent")
 
     )
 
@@ -382,7 +396,8 @@ def deactivate_product(
     db: Session,
     company_id: int,
     user_id: int,
-    product_id: int
+    product_id: int,
+    request: Request
 ):
 
     product = get_product(
@@ -406,7 +421,11 @@ def deactivate_product(
 
     action="Product Deactivated",
 
-    entity_name=product.name
+    entity_name=product.name,
+
+    ip_address=request.client.host,
+
+    browser=request.headers.get("user-agent")    
 
     )
 
@@ -616,60 +635,6 @@ def filter_products(
     return result
 
 # -----------------------------
-# Dashboard Summary
-# -----------------------------
-def dashboard_summary(
-    db: Session,
-    company_id: int
-):
-
-    total_products = (
-        db.query(Product)
-        .filter(
-            Product.company_id == company_id
-        )
-        .count()
-    )
-
-    active_products = (
-        db.query(Product)
-        .filter(
-            Product.company_id == company_id,
-            Product.status == "Active"
-        )
-        .count()
-    )
-
-    inactive_products = (
-        db.query(Product)
-        .filter(
-            Product.company_id == company_id,
-            Product.status == "Inactive"
-        )
-        .count()
-    )
-
-    total_categories = (
-        db.query(Category)
-        .filter(
-            Category.company_id == company_id
-        )
-        .count()
-    )
-
-    return {
-
-        "total_products": total_products,
-
-        "active_products": active_products,
-
-        "inactive_products": inactive_products,
-
-        "total_categories": total_categories
-
-    }
-
-    # -----------------------------
 # Sort Products
 # -----------------------------
 def sort_products(

@@ -9,6 +9,7 @@ class CompanyCreateSchema(BaseModel):
     email: EmailStr
     address: str
     phone: str
+    role: str 
 
     # First Admin Details
     admin_name: str
@@ -23,6 +24,7 @@ class CompanyResponse(BaseModel):
     email: EmailStr
     address: str
     phone: str
+    role: str
     created_at: datetime
 
     class Config:

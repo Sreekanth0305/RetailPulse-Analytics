@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
@@ -19,7 +19,8 @@ def create_category(
     db: Session,
     company_id: int,
     user_id: int,
-    category: CategoryCreate
+    category: CategoryCreate,
+    request: Request
 ):
 
     existing = (
@@ -58,7 +59,11 @@ def create_category(
 
     action="Category Created",
 
-    entity_name=db_category.name
+    entity_name=db_category.name,
+
+    ip_address=request.client.host,
+
+    browser=request.headers.get("user-agent")
 
     )
 
@@ -141,7 +146,8 @@ def update_category(
     company_id: int,
     user_id: int,
     category_id: int,
-    data: CategoryUpdate
+    data: CategoryUpdate,
+    request: Request
 ):
 
     category = get_category(
@@ -167,7 +173,11 @@ def update_category(
 
     action="Category Updated",
 
-    entity_name=category.name
+    entity_name=category.name,
+
+    ip_address=request.client.host,
+
+    browser=request.headers.get("user-agent")
 
     )
 
@@ -181,7 +191,8 @@ def delete_category(
     db: Session,
     company_id: int,
     user_id: int,
-    category_id: int
+    category_id: int,
+    request: Request
 ):
 
     category = get_category(
@@ -205,7 +216,11 @@ def delete_category(
 
     action="Category Deleted",
 
-    entity_name=category_name
+    entity_name=category_name,
+
+    ip_address=request.client.host,
+
+    browser=request.headers.get("user-agent")
 
     )
 

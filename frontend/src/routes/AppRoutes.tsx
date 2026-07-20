@@ -7,6 +7,9 @@ import Profile from "../pages/Profile";
 import AuditLogs from "../pages/AuditLogs";
 import Categories from "../pages/Categories";
 import Products from "../pages/Products";
+import Sales from "../pages/Sales";
+import SaleDetails from "../pages/SaleDetails";
+import Notifications from "../pages/Notifications";
 
 export default function AppRoutes() {
   return (
@@ -19,6 +22,9 @@ export default function AppRoutes() {
         <Route path="/audit-logs" element={<AuditLogs />}/>
         <Route path="/categories" element={<Categories />}/>
         <Route path="/products" element={<Products />} />
+        <Route path="/sales" element={<Sales />} />
+        <Route path="/sales/:saleId" element={<SaleDetails />}/>
+        <Route path="/notifications" element={<Notifications />}/>
       </Routes>
     </BrowserRouter>
   );
