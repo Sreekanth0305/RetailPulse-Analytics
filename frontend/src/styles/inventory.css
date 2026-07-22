@@ -1,0 +1,437 @@
+/* =====================================================
+   INVENTORY PAGE
+===================================================== */
+
+.inventory {
+
+    margin-left: 250px;
+
+    margin-top: 80px;
+
+    padding: 30px;
+
+    background: #f5f7fb;
+
+    min-height: 100vh;
+
+    box-sizing: border-box;
+
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.inventory-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 20px;
+
+}
+
+.inventory-header h2 {
+
+    margin: 0;
+
+    color: #1f2937;
+
+    font-size: 28px;
+
+    font-weight: 700;
+
+}
+
+/* =====================================================
+   TOOLBAR
+===================================================== */
+
+.inventory-toolbar {
+
+    display: flex;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+    margin-bottom: 25px;
+
+}
+
+.inventory-toolbar input,
+
+.inventory-toolbar select {
+
+    padding: 10px 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 6px;
+
+    min-width: 170px;
+
+    background: white;
+
+    outline: none;
+
+    font-size: 14px;
+
+}
+
+.inventory-toolbar input:focus,
+
+.inventory-toolbar select:focus {
+
+    border-color: #1976d2;
+
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.inventory-toolbar button {
+
+    border: none;
+
+    padding: 10px 18px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-weight: 600;
+
+    transition: .3s;
+
+}
+
+.filter-btn {
+
+    background: #1976d2;
+
+    color: white;
+
+}
+
+.filter-btn:hover {
+
+    background: #1258a8;
+
+}
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.inventory-table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    background: white;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+
+}
+
+.inventory-table thead {
+
+    background: #1976d2;
+
+    color: white;
+
+}
+
+.inventory-table th {
+
+    padding: 14px;
+
+    text-align: left;
+
+    font-weight: 600;
+
+    font-size: 15px;
+
+}
+
+.inventory-table td {
+
+    padding: 14px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    font-size: 14px;
+
+}
+
+.inventory-table tbody tr:hover {
+
+    background: #f9fafb;
+
+}
+
+/* =====================================================
+   STATUS BADGES
+===================================================== */
+
+.status {
+
+    display: inline-block;
+
+    padding: 6px 12px;
+
+    border-radius: 20px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    text-align: center;
+
+}
+
+.status.in-stock {
+
+    background: #dcfce7;
+
+    color: #166534;
+
+}
+
+.status.low-stock {
+
+    background: #fef3c7;
+
+    color: #b45309;
+
+}
+
+.status.out-of-stock {
+
+    background: #fee2e2;
+
+    color: #b91c1c;
+
+}
+
+/* =====================================================
+   ACTION BUTTONS
+===================================================== */
+
+.inventory-actions {
+
+    display: flex;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+
+}
+
+.inventory-actions button {
+
+    border: none;
+
+    padding: 7px 14px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    transition: .3s;
+
+}
+
+/* Add */
+
+.add-btn {
+
+    background: #16a34a;
+
+    color: white;
+
+}
+
+.add-btn:hover {
+
+    background: #15803d;
+
+}
+
+/* Remove */
+
+.remove-btn {
+
+    background: #dc2626;
+
+    color: white;
+
+}
+
+.remove-btn:hover {
+
+    background: #b91c1c;
+
+}
+
+/* Adjust */
+
+.adjust-btn {
+
+    background: #2563eb;
+
+    color: white;
+
+}
+
+.adjust-btn:hover {
+
+    background: #1d4ed8;
+
+}
+
+/* Reorder */
+
+.reorder-btn {
+
+    background: #f59e0b;
+
+    color: white;
+
+}
+
+.reorder-btn:hover {
+
+    background: #d97706;
+
+}
+
+/* History */
+
+.history-btn {
+
+    background: #6b7280;
+
+    color: white;
+
+}
+
+.history-btn:hover {
+
+    background: #4b5563;
+
+}
+
+/* =====================================================
+   NO DATA
+===================================================== */
+
+.inventory-table td[colspan] {
+
+    text-align: center;
+
+    padding: 30px;
+
+    color: #6b7280;
+
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width:992px){
+
+    .inventory {
+
+        margin-left: 0;
+
+        margin-top: 70px;
+
+        padding: 20px;
+
+    }
+
+    .inventory-toolbar{
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+    .inventory-toolbar input,
+
+    .inventory-toolbar select,
+
+    .inventory-toolbar button{
+
+        width:100%;
+
+    }
+
+    .inventory-table{
+
+        display:block;
+
+        overflow-x:auto;
+
+        white-space:nowrap;
+
+    }
+
+}
+
+@media (max-width:576px){
+
+    .inventory{
+
+        padding:15px;
+
+    }
+
+    .inventory-header{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:15px;
+
+    }
+
+    .inventory-header h2{
+
+        font-size:22px;
+
+    }
+
+    .inventory-actions{
+
+        flex-direction:column;
+
+    }
+
+    .inventory-actions button{
+
+        width:100%;
+
+    }
+
+}

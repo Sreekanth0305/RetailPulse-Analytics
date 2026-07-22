@@ -10,6 +10,7 @@ import Products from "../pages/Products";
 import Sales from "../pages/Sales";
 import SaleDetails from "../pages/SaleDetails";
 import Notifications from "../pages/Notifications";
+import Inventory from "../pages/Inventory";
 
 export default function AppRoutes() {
   return (
@@ -25,6 +26,7 @@ export default function AppRoutes() {
         <Route path="/sales" element={<Sales />} />
         <Route path="/sales/:saleId" element={<SaleDetails />}/>
         <Route path="/notifications" element={<Notifications />}/>
+        <Route path="/inventory" element={<Inventory />}/>
       </Routes>
     </BrowserRouter>
   );

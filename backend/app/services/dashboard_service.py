@@ -5,6 +5,7 @@ from app.models.employee import Employee
 from app.models.product import Product
 from app.models.category import Category
 from app.models.sale import Sale
+from app.models.inventory import Inventory
 
 from app.schemas.dashboard_schema import DashboardResponse
 
@@ -105,6 +106,132 @@ def get_dashboard_data(db: Session, company_id: int):
     
     )
 
+# -----------------------------
+# Inventory Summary
+# -----------------------------
+
+    total_inventory_products = (
+    
+        db.query(Inventory)
+    
+        .filter(
+            Inventory.company_id == company_id
+        )
+    
+        .count()
+    
+    )
+    
+    total_inventory_quantity = (
+    
+        db.query(
+    
+            func.sum(Inventory.current_stock)
+    
+        )
+    
+        .filter(
+            Inventory.company_id == company_id
+        )
+    
+        .scalar()
+    
+    ) or 0
+    
+    low_stock_products = (
+    
+        db.query(Inventory)
+    
+        .filter(
+    
+            Inventory.company_id == company_id,
+    
+            Inventory.stock_status == "Low Stock"
+    
+        )
+    
+        .count()
+    
+    )
+    
+    out_of_stock_products = (
+    
+        db.query(Inventory)
+    
+        .filter(
+    
+            Inventory.company_id == company_id,
+    
+            Inventory.stock_status == "Out Of Stock"
+    
+        )
+    
+        .count()
+    
+    )
+
+# -----------------------------
+# Inventory By Category Chart
+# -----------------------------
+
+    inventory_by_category = (
+    
+        db.query(
+    
+            Category.name.label("category"),
+    
+            func.sum(Inventory.current_stock).label("quantity")
+    
+        )
+    
+        .join(
+            Product,
+            Inventory.product_id == Product.id
+        )
+    
+        .join(
+            Category,
+            Product.category_id == Category.id
+        )
+    
+        .filter(
+            Inventory.company_id == company_id
+        )
+    
+        .group_by(
+            Category.name
+        )
+    
+        .all()
+    
+    )
+
+# -----------------------------
+# Stock Status Distribution
+# -----------------------------
+
+    stock_status_distribution = (
+    
+        db.query(
+    
+            Inventory.stock_status,
+    
+            func.count(Inventory.id).label("count")
+    
+        )
+    
+        .filter(
+            Inventory.company_id == company_id
+        )
+    
+        .group_by(
+            Inventory.stock_status
+        )
+    
+        .all()
+    
+    )
+
     return DashboardResponse(
 
     # Employee Cards
@@ -123,7 +250,39 @@ def get_dashboard_data(db: Session, company_id: int):
     total_sales=total_sales,
     total_revenue=total_sales,
     total_orders=total_orders,
-    average_order_value=average_order_value
+    average_order_value=average_order_value,
 
+    # Inventory Cards
+    total_inventory_products=total_inventory_products,
+    total_inventory_quantity=total_inventory_quantity,
+    low_stock_products=low_stock_products,
+    out_of_stock_products=out_of_stock_products,
 
+    inventory_by_category=[
+
+        {
+    
+            "category": row.category,
+    
+            "quantity": row.quantity
+    
+        }
+    
+        for row in inventory_by_category
+    
+    ],
+    
+    stock_status_distribution=[
+    
+        {
+    
+            "status": row.stock_status,
+    
+            "count": row.count
+    
+        }
+    
+        for row in stock_status_distribution
+    
+    ]
     )

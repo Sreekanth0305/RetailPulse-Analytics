@@ -10,7 +10,8 @@ import {
   Logout,
   Person,
   History,
-  PointOfSale
+  PointOfSale,
+  Warehouse
 } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
@@ -88,6 +89,14 @@ function Sidebar() {
             <PointOfSale />
         
             <span>Sales</span>
+        
+        </li>
+
+        <li onClick={() => navigate("/inventory")}>
+
+            <Warehouse />
+        
+            <span>Inventory</span>
         
         </li>
 

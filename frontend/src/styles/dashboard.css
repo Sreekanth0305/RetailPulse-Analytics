@@ -72,3 +72,41 @@
     color:#1976d2;
 
 }
+
+/* ===========================
+   DASHBOARD CHARTS
+=========================== */
+
+.dashboard-charts{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:25px;
+
+    margin-top:30px;
+
+}
+
+.chart-card{
+
+    background:#fff;
+
+    padding:20px;
+
+    border-radius:10px;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+
+}
+
+.chart-card h3{
+
+    margin-bottom:20px;
+
+    color:#1976d2;
+
+    text-align:center;
+
+}
