@@ -3,12 +3,14 @@ from sqlalchemy.orm import Session
 
 from app.models.product import Product
 from app.models.category import Category
+from app.models.inventory import Inventory
 from app.schemas.product_schema import (
     ProductCreate,
     ProductUpdate
 )
 
 from app.services.audit_service import create_audit_log
+from app.services.inventory_service import create_inventory_record
 
 
 # def build_product_response(
@@ -123,6 +125,26 @@ def create_product(
     db.add(db_product)
     db.commit()
     db.refresh(db_product)
+
+    inventory = create_inventory_record(
+    db=db,
+    company_id=company_id,
+    product_id=db_product.id,
+    reorder_level=5
+)
+
+    # Set opening stock from Product form
+    inventory.current_stock = product.stock_quantity
+    inventory.available_stock = product.stock_quantity
+    
+    inventory.stock_status = (
+        "Out Of Stock"
+        if product.stock_quantity == 0
+        else "In Stock"
+    )
+    
+    db.commit()
+    db.refresh(inventory)
 
     create_audit_log(
     db=db,
@@ -260,6 +282,28 @@ def update_product(
     product.unit_price = data.unit_price
     product.cost_price = data.cost_price
     product.stock_quantity = data.stock_quantity
+    inventory = (
+        db.query(Inventory)
+        .filter(
+            Inventory.company_id == company_id,
+            Inventory.product_id == product.id
+        )
+        .first()
+    )
+    
+    if inventory:
+        inventory.current_stock = product.stock_quantity
+        inventory.available_stock = (
+            product.stock_quantity - inventory.reserved_stock
+        )
+    
+        if inventory.available_stock == 0:
+            inventory.stock_status = "Out Of Stock"
+        elif inventory.available_stock <= inventory.reorder_level:
+            inventory.stock_status = "Low Stock"
+        else:
+            inventory.stock_status = "In Stock"
+    
     product.unit_of_measure = data.unit_of_measure
     product.status = data.status
 

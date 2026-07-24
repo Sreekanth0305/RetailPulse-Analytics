@@ -10,6 +10,7 @@ from app.models.sale import Sale
 from app.models.sale_item import SaleItem
 from app.models.product import Product
 from app.models.category import Category
+from app.models.inventory import Inventory
 
 from app.schemas.sale_schema import (
     SaleCreate,
@@ -271,6 +272,32 @@ def create_sale(
 
         product.stock_quantity -= item.quantity
 
+        inventory = (
+            db.query(Inventory)
+            .filter(
+                Inventory.company_id == company_id,
+                Inventory.product_id == product.id
+            )
+            .first()
+        )
+        
+        if inventory:
+            inventory.current_stock = product.stock_quantity
+            inventory.available_stock = (
+                inventory.current_stock -
+                inventory.reserved_stock
+            )
+        
+            inventory.stock_status = (
+                "Out Of Stock"
+                if inventory.available_stock == 0
+                else (
+                    "Low Stock"
+                    if inventory.available_stock <= inventory.reorder_level
+                    else "In Stock"
+                )
+            )
+        
         # Low Stock Notification
         if product.stock_quantity <= LOW_STOCK_THRESHOLD and product.stock_quantity > 0:
         
@@ -657,6 +684,32 @@ def update_sale(
 
         product.stock_quantity -= item.quantity
 
+        inventory = (
+            db.query(Inventory)
+            .filter(
+                Inventory.company_id == company_id,
+                Inventory.product_id == product.id
+            )
+            .first()
+        )
+        
+        if inventory:
+            inventory.current_stock = product.stock_quantity
+            inventory.available_stock = (
+                inventory.current_stock -
+                inventory.reserved_stock
+            )
+        
+            inventory.stock_status = (
+                "Out Of Stock"
+                if inventory.available_stock == 0
+                else (
+                    "Low Stock"
+                    if inventory.available_stock <= inventory.reorder_level
+                    else "In Stock"
+                )
+            )
+
         # Low Stock Notification
         if product.stock_quantity <= LOW_STOCK_THRESHOLD and product.stock_quantity > 0:
         
@@ -775,6 +828,33 @@ def delete_sale(
     
             if product.status == "Out of Stock":
                 product.status = "Active"
+
+            inventory = (
+                db.query(Inventory)
+                .filter(
+                    Inventory.company_id == company_id,
+                    Inventory.product_id == product.id
+                )
+                .first()
+            )
+            
+            if inventory:
+                inventory.current_stock = product.stock_quantity
+            
+                inventory.available_stock = (
+                    inventory.current_stock -
+                    inventory.reserved_stock
+                )
+            
+                inventory.stock_status = (
+                    "Out Of Stock"
+                    if inventory.available_stock == 0
+                    else (
+                        "Low Stock"
+                        if inventory.available_stock <= inventory.reorder_level
+                        else "In Stock"
+                    )
+                )
     
     db.query(SaleItem).filter(
         SaleItem.sale_id == sale.id

@@ -25,6 +25,7 @@ from app.routes.product_routes import router as product_router
 from app.routes.sale_routes import router as sale_router
 from app.routes.notification_routes import router as notification_router
 from app.routes.inventory_routes import router as inventory_router
+from app.routes.analytics_routes import router as analytics_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -62,3 +63,4 @@ app.include_router(product_router)
 app.include_router(sale_router)
 app.include_router(notification_router)
 app.include_router(inventory_router)
+app.include_router(analytics_router)

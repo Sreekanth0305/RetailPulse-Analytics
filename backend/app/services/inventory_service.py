@@ -674,6 +674,15 @@ def add_stock(
 
     )
 
+    product = (
+        db.query(Product)
+        .filter(Product.id == product_id)
+        .first()
+    )
+    
+    if product:
+        product.stock_quantity = inventory.current_stock
+    
     db.commit()
     db.refresh(inventory)
 
@@ -802,6 +811,15 @@ def remove_stock(
 
     )
 
+    product = (
+        db.query(Product)
+        .filter(Product.id == product_id)
+        .first()
+    )
+    
+    if product:
+        product.stock_quantity = inventory.current_stock
+
     db.commit()
     db.refresh(inventory)
 
@@ -909,6 +927,15 @@ def adjust_stock(
         inventory.reorder_level
 
     )
+
+    product = (
+        db.query(Product)
+        .filter(Product.id == product_id)
+        .first()
+    )
+    
+    if product:
+        product.stock_quantity = inventory.current_stock
 
     db.commit()
     db.refresh(inventory)

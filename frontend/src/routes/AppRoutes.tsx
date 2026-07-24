@@ -11,6 +11,7 @@ import Sales from "../pages/Sales";
 import SaleDetails from "../pages/SaleDetails";
 import Notifications from "../pages/Notifications";
 import Inventory from "../pages/Inventory";
+import Analytics from "../pages/Analytics";
 
 export default function AppRoutes() {
   return (
@@ -27,6 +28,7 @@ export default function AppRoutes() {
         <Route path="/sales/:saleId" element={<SaleDetails />}/>
         <Route path="/notifications" element={<Notifications />}/>
         <Route path="/inventory" element={<Inventory />}/>
+        <Route path="/analytics" element={<Analytics />}/>
       </Routes>
     </BrowserRouter>
   );

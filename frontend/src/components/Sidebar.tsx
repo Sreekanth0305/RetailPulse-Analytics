@@ -100,9 +100,12 @@ function Sidebar() {
         
         </li>
 
-        <li>
+        <li onClick={() => navigate("/analytics")}>
+
           <Analytics />
+
           <span>Analytics</span>
+
         </li>
 
         <li onClick={() => navigate("/notifications")}>
