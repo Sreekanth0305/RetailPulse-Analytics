@@ -20,7 +20,8 @@ from app.services.sale_service import (
     delete_sale,
     search_sales,
     filter_sales,
-    sort_sales
+    sort_sales,
+    get_customer_purchase_history
 )
 
 router = APIRouter(
@@ -159,6 +160,22 @@ def sort_sales_api(
 
         sort_by=sort_by
 
+    )
+
+# -----------------------------
+# Customer Purchase History
+# -----------------------------
+@router.get("/customer/{customer_name}")
+def customer_purchase_history(
+    customer_name: str,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    return get_customer_purchase_history(
+        db=db,
+        company_id=current_user.company_id,
+        customer_name=customer_name
     )
 
 # -----------------------------

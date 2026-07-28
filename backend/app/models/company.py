@@ -53,3 +53,9 @@ class Company(Base):
         back_populates="company",
         cascade="all, delete-orphan"
     )
+
+    customers = relationship(
+        "Customer",
+        back_populates="company",
+        cascade="all, delete-orphan"
+    )

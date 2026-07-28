@@ -15,10 +15,20 @@ import {
     getStockStatusSummary,
     getLowStockProducts,
     getOutOfStockProducts,
-    getInventoryValue
+    getInventoryValue,
+    getDrilldownCategories,
+    getDrilldownProducts,
+    getDrilldownSales
 } from "../services/analyticsService";
 
+import { getCustomerAnalytics } from "../services/customerService";
+
+import { createAuditLog } from "../services/auditService";
+
 import "../styles/analytics.css";
+
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 import {
     ResponsiveContainer,
@@ -103,6 +113,24 @@ function Analytics() {
     
     const [outOfStockProducts, setOutOfStockProducts] = useState<any[]>([]);
 
+    const [categories,setCategories] = useState([]);
+
+    const [products,setProducts] = useState([]);
+    
+    const [sales,setSales] = useState([]);
+    
+    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+
+    const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
+
+    const [refreshing, setRefreshing] = useState(false);
+
+    const [customerAnalytics, setCustomerAnalytics] = useState<any>(null);
+
+    const getBrowser = () => {
+        return navigator.userAgent;
+    };
+
     const handleFilterChange = (
 
         e: React.ChangeEvent<
@@ -144,6 +172,24 @@ function Analytics() {
             const response = await getAnalyticsKPIs(params);
     
             setKpis(response.data);
+    
+        }
+    
+        catch (error) {
+    
+            console.log(error);
+    
+        }
+    
+    };
+
+    const loadCustomerAnalytics = async () => {
+
+        try {
+    
+            const response = await getCustomerAnalytics();
+    
+            setCustomerAnalytics(response.data);
     
         }
     
@@ -449,8 +495,8 @@ function Analytics() {
     
     };
 
-        const loadOutOfStockProducts = async () => {
-    
+    const loadOutOfStockProducts = async () => {
+
         try {
     
             const params:any = {};
@@ -475,9 +521,285 @@ function Analytics() {
     
     };
 
+    const refreshDashboard = async () => {
+
+        setRefreshing(true);
+
+        await Promise.all([
+
+            loadKPIs(),
+        
+            loadRevenueTrend(),
+        
+            loadSalesTrend(),
+        
+            loadTopProducts(),
+        
+            loadTopCategories(),
+        
+            loadPaymentMethods(),
+        
+            loadSalesChannels(),
+        
+            loadInventoryDistribution(),
+        
+            loadInventoryValue(),
+        
+            loadStockStatus(),
+        
+            loadLowStockProducts(),
+        
+            loadOutOfStockProducts(),
+        
+        ]);
+    
+        setTimeout(() => {
+    
+            setRefreshing(false);
+    
+        }, 500);
+
+    };
+
+    const exportCSV = () => {
+
+        let csv = "";
+    
+        csv += "Dashboard KPIs\n";
+        csv += "Metric,Value\n";
+        csv += `Total Revenue,${kpis.total_revenue}\n`;
+        csv += `Total Orders,${kpis.total_orders}\n`;
+        csv += `Products Sold,${kpis.total_products_sold}\n`;
+        csv += `Average Order Value,${kpis.average_order_value}\n`;
+        csv += `Inventory Value,${kpis.total_inventory_value}\n`;
+        csv += `Low Stock,${kpis.low_stock_products}\n`;
+        csv += `Out Of Stock,${kpis.out_of_stock_products}\n`;
+        csv += `Categories,${kpis.total_categories}\n\n`;
+    
+        csv += "Revenue Trend\n";
+        csv += "Period,Revenue\n";
+    
+        revenueTrend.forEach((item:any) => {
+    
+            csv += `${item.period},${item.revenue}\n`;
+    
+        });
+    
+        csv += "\nTop Selling Products\n";
+        csv += "Product,Quantity Sold\n";
+    
+        topProducts.forEach((item:any) => {
+    
+            csv += `${item.product_name},${item.quantity_sold}\n`;
+    
+        });
+    
+        csv += "\nSales History\n";
+        csv += "Invoice,Customer,Date,Quantity,Amount,Payment,Channel\n";
+    
+        sales.forEach((item:any) => {
+    
+            csv += `${item.invoice_number},${item.customer_name},${item.sale_date},${item.quantity},${item.total_amount},${item.payment_method},${item.sales_channel}\n`;
+    
+        });
+    
+        const blob = new Blob([csv], {
+    
+            type: "text/csv;charset=utf-8;"
+    
+        });
+    
+        const url = URL.createObjectURL(blob);
+    
+        const link = document.createElement("a");
+    
+        link.href = url;
+    
+        link.download = "Analytics_Report.csv";
+    
+        link.click();
+
+        createAuditLog({
+            action: "Report Exported",
+            module: "Analytics",
+            export_type: "CSV",
+            browser: getBrowser()
+        });
+    
+    };
+
+    const exportPDF = () => {
+
+        const doc = new jsPDF();
+    
+        doc.setFontSize(18);
+    
+        doc.text("RetailPulse Analytics Report", 14, 15);
+    
+        autoTable(doc, {
+    
+            startY: 25,
+    
+            head: [["Metric", "Value"]],
+    
+            body: [
+    
+                ["Total Revenue", kpis.total_revenue],
+    
+                ["Total Orders", kpis.total_orders],
+    
+                ["Products Sold", kpis.total_products_sold],
+    
+                ["Average Order Value", kpis.average_order_value],
+    
+                ["Inventory Value", kpis.total_inventory_value],
+    
+                ["Low Stock", kpis.low_stock_products],
+    
+                ["Out Of Stock", kpis.out_of_stock_products],
+    
+                ["Categories", kpis.total_categories]
+    
+            ]
+    
+        });
+    
+        autoTable(doc, {
+    
+            startY: (doc as any).lastAutoTable.finalY + 10,
+    
+            head: [["Product", "Quantity Sold"]],
+    
+            body: topProducts.map((item:any) => [
+    
+                item.product_name,
+    
+                item.quantity_sold
+    
+            ])
+    
+        });
+    
+        autoTable(doc, {
+    
+            startY: (doc as any).lastAutoTable.finalY + 10,
+    
+            head: [[
+    
+                "Invoice",
+    
+                "Customer",
+    
+                "Date",
+    
+                "Qty",
+    
+                "Amount"
+    
+            ]],
+    
+            body: sales.map((sale:any) => [
+    
+                sale.invoice_number,
+    
+                sale.customer_name,
+    
+                sale.sale_date,
+    
+                sale.quantity,
+    
+                sale.total_amount
+    
+            ])
+    
+        });
+    
+        doc.save("Analytics_Report.pdf");
+
+        createAuditLog({
+            action: "Report Exported",
+            module: "Analytics",
+            export_type: "PDF",
+            browser: getBrowser()
+        });
+
+    
+    };
+
+    const loadCategories = async () => {
+
+        try {
+    
+            const res = await getDrilldownCategories();
+    
+            setCategories(res.data);
+    
+        }
+    
+        catch (err) {
+    
+            console.log(err);
+    
+        }
+    
+    };
+    
+    const loadProducts = async (categoryId:number) => {
+    
+        try {
+    
+            const res = await getDrilldownProducts(categoryId);
+    
+            setProducts(res.data);
+    
+            setSelectedCategory(categoryId);
+    
+            setSales([]);
+    
+        }
+    
+        catch (err) {
+    
+            console.log(err);
+    
+        }
+    
+    };
+    
+    const loadSales = async (productId:number) => {
+    
+        try {
+
+            console.log("Selected Product:", productId);
+    
+            const res = await getDrilldownSales(productId);
+
+            console.log("Sales API Response:", res.data);
+    
+            setSales(res.data);
+    
+            setSelectedProduct(productId);
+    
+        }
+    
+        catch (err) {
+    
+            console.log(err);
+    
+        }
+    
+    };
+
     useEffect(() => {
 
        loadKPIs();
+
+
+       createAuditLog({
+        action: "Dashboard Viewed",
+        module: "Analytics",
+        browser: getBrowser()
+    }); 
 
     }, []);
 
@@ -512,6 +834,22 @@ function Analytics() {
         loadLowStockProducts();
     
         loadOutOfStockProducts();
+
+        loadCategories();
+
+        loadCustomerAnalytics();
+    
+    }, []);
+
+    useEffect(() => {
+
+        const interval = setInterval(() => {
+    
+            refreshDashboard();
+    
+        }, 30000);
+    
+        return () => clearInterval(interval);
     
     }, []);
 
@@ -536,6 +874,15 @@ function Analytics() {
                     Sales & Inventory Analytics
 
                 </p>
+                <div className="analytics-header-actions">
+                    <button
+                        className="refresh-btn"
+                        onClick={refreshDashboard}
+                        disabled={refreshing}
+                    >
+                        {refreshing ? "Refreshing..." : "Refresh Dashboard"}
+                    </button>
+                </div>
 
                 <div className="filter-panel">
 
@@ -639,11 +986,36 @@ function Analytics() {
                             loadStockStatus();
                             loadLowStockProducts();
                             loadOutOfStockProducts();
+
+                            createAuditLog({
+                                action: "Dashboard Filters Applied",
+                                module: "Analytics",
+                                browser: getBrowser()
+                            });
+
                         }}
                     >
 
                         Apply Filters
                     
+                    </button>
+
+                    {/* <div className="refresh-container">
+                        <button
+                            className="refresh-btn"
+                            onClick={refreshDashboard}
+                            disabled={refreshing}
+                        >
+                            {refreshing ? "Refreshing..." : "Refresh Dashboard"}
+                        </button>
+                    </div> */}
+
+                    <button onClick={exportCSV}>
+                        Export CSV
+                    </button>
+                    
+                    <button onClick={exportPDF}>
+                        Export PDF
                     </button>
 
                 </div>
@@ -755,6 +1127,220 @@ function Analytics() {
                         </h1>
                 
                     </div>
+                
+                </div>
+
+                <h2 className="section-title">
+
+                    Customer Analytics
+                
+                </h2>
+                
+                <div className="cards">
+                
+                    <div className="card">
+                
+                        <h3>Total Customers</h3>
+                
+                        <h1>{customerAnalytics?.total_customers ?? 0}</h1>
+                
+                    </div>
+                
+                    <div className="card">
+                
+                        <h3>Active Customers</h3>
+                
+                        <h1>{customerAnalytics?.active_customers ?? 0}</h1>
+                
+                    </div>
+                
+                    <div className="card">
+                
+                        <h3>New Customers</h3>
+                
+                        <h1>{customerAnalytics?.new_customers ?? 0}</h1>
+                
+                    </div>
+                
+                    <div className="card">
+                
+                        <h3>Returning Customers</h3>
+                
+                        <h1>{customerAnalytics?.returning_customers ?? 0}</h1>
+                
+                    </div>
+                
+                </div>
+                
+                <div className="cards">
+                
+                    <div className="card">
+                
+                        <h3>Average Customer Spend</h3>
+                
+                        <h1>
+                
+                            ₹{customerAnalytics?.average_customer_spend ?? 0}
+                
+                        </h1>
+                
+                    </div>
+                
+                    <div className="card">
+                
+                        <h3>Total Customer Revenue</h3>
+                
+                        <h1>
+                
+                            ₹{customerAnalytics?.total_revenue ?? 0}
+                
+                        </h1>
+                
+                    </div>
+                
+                    <div className="card">
+                
+                        <h3>Purchase Frequency</h3>
+                
+                        <h1>
+                
+                            {customerAnalytics?.purchase_frequency ?? 0}
+                
+                        </h1>
+                
+                    </div>
+                
+                </div>
+
+                <h2 className="section-title">
+
+                    Customer Charts
+                
+                </h2>
+                
+                <div className="analytics-grid">
+                
+                    <div className="chart-card">
+                
+                        <h3>Customer Growth</h3>
+                
+                        <ResponsiveContainer width="100%" height={300}>
+                
+                            <LineChart data={customerAnalytics?.customer_growth ?? []}>
+                
+                                <CartesianGrid strokeDasharray="3 3"/>
+                
+                                <XAxis dataKey="month"/>
+                
+                                <YAxis/>
+                
+                                <Tooltip/>
+                
+                                <Line
+                
+                                    type="monotone"
+                
+                                    dataKey="customers"
+                
+                                    stroke="#1976d2"
+                
+                                    strokeWidth={3}
+                
+                                />
+                
+                            </LineChart>
+                
+                        </ResponsiveContainer>
+                
+                    </div>
+                
+                    <div className="chart-card">
+                
+                        <h3>Revenue by Customer Type</h3>
+                
+                        <ResponsiveContainer width="100%" height={300}>
+                
+                            <BarChart
+                
+                                data={customerAnalytics?.customer_types ?? []}
+                
+                            >
+                
+                                <CartesianGrid strokeDasharray="3 3"/>
+                
+                                <XAxis dataKey="customer_type"/>
+                
+                                <YAxis/>
+                
+                                <Tooltip/>
+                
+                                <Bar
+                
+                                    dataKey="count"
+                
+                                    fill="#4caf50"
+                
+                                />
+                
+                            </BarChart>
+                
+                        </ResponsiveContainer>
+                
+                    </div>
+                
+                </div>
+
+                <div className="chart-card">
+
+                    <h3>
+                
+                        Top Customers
+                
+                    </h3>
+                
+                    <table className="analytics-table">
+                
+                        <thead>
+                
+                            <tr>
+                
+                                <th>Name</th>
+                
+                                <th>Orders</th>
+                
+                                <th>Revenue</th>
+                
+                            </tr>
+                
+                        </thead>
+                
+                        <tbody>
+                
+                            {
+                
+                                customerAnalytics?.top_customers?.map((customer:any)=>(
+                
+                                    <tr key={customer.id}>
+                
+                                        <td>{customer.full_name}</td>
+                
+                                        <td>{customer.total_orders}</td>
+                
+                                        <td>
+                
+                                            ₹{customer.total_revenue}
+                
+                                        </td>
+                
+                                    </tr>
+                
+                                ))
+                
+                            }
+                
+                        </tbody>
+                
+                    </table>
                 
                 </div>
 
@@ -1274,6 +1860,147 @@ function Analytics() {
                                 </tr>
                             ))
                         }
+                        </tbody>
+                
+                    </table>
+                
+                </div>
+
+                <h2 className="section-title">
+                    Drill Down Analytics
+                </h2>
+                
+                <div className="analytics-grid">
+                
+                    <div className="chart-card">
+                
+                        <h3>Categories</h3>
+                
+                        <table className="analytics-table">
+                
+                            <thead>
+                
+                                <tr>
+                
+                                    <th>Category</th>
+                
+                                    <th>Total Products</th>
+                
+                                </tr>
+                
+                            </thead>
+                
+                            <tbody>
+                
+                                {categories.map((cat:any) => (
+                
+                                    <tr
+                                        key={cat.id}
+                                        onClick={() => loadProducts(cat.id)}
+                                        className={
+                                            selectedCategory === cat.id
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                
+                                        <td>{cat.name}</td>
+
+                                        <td>{cat.total_products}</td>
+                
+                                    </tr>
+                
+                                ))}
+                
+                            </tbody>
+                
+                        </table>
+                
+                    </div>
+                
+                    <div className="chart-card">
+                
+                        <h3>Products</h3>
+                
+                        <table className="analytics-table">
+                
+                            <thead>
+                
+                                <tr>
+                
+                                    <th>Product</th>
+                
+                                    <th>Total Sold</th>
+                
+                                </tr>
+                
+                            </thead>
+                
+                            <tbody>
+                
+                                {products.map((p:any)=>(
+                
+                                    <tr
+                                        key={p.id}
+                                        onClick={() => loadSales(p.id)}
+                                        className={
+                                            selectedProduct===p.id
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                
+                                        <td>{p.name}</td>
+
+                                        <td>{p.total_sold}</td>
+                
+                                    </tr>
+                
+                                ))}
+                
+                            </tbody>
+                
+                        </table>
+                
+                    </div>
+                
+                </div>
+                
+                <div className="chart-card">
+                
+                    <h3>Sales History</h3>
+                
+                    <table className="analytics-table">
+                
+                        <thead>
+                        <tr>
+                            <th>Invoice</th>
+                            <th>Customer</th>
+                            <th>Sale Date</th>
+                            <th>Quantity</th>
+                            <th>Total Amount</th>
+                            <th>Payment Method</th>
+                            <th>Sales Channel</th>
+                        </tr>
+                        </thead>
+                
+                        <tbody>
+                
+                            {sales.map((sale:any)=>(
+                
+                                <tr key={sale.invoice_number}>
+                
+                                    <td>{sale.invoice_number}</td>
+                                    <td>{sale.customer_name}</td>
+                                    <td>{sale.sale_date}</td>
+                                    <td>{sale.quantity}</td>
+                                    <td>{sale.total_amount}</td>
+                                    <td>{sale.payment_method}</td>
+                                    <td>{sale.sales_channel}</td>
+                                </tr>
+                
+                            ))}
+                
                         </tbody>
                 
                     </table>

@@ -12,6 +12,7 @@ from app.models.sale import Sale
 from app.models.sale_item import SaleItem
 from app.models.inventory import Inventory
 from app.models.inventory_movement import InventoryMovement
+from app.models.customer_purchase_summary import CustomerPurchaseSummary
 
 
 from app.routes.company_routes import router as company_router
@@ -26,6 +27,9 @@ from app.routes.sale_routes import router as sale_router
 from app.routes.notification_routes import router as notification_router
 from app.routes.inventory_routes import router as inventory_router
 from app.routes.analytics_routes import router as analytics_router
+from app.routes.customer_routes import router as customer_router
+from app.routes.customer_profile_routes import router as customer_profile_router
+from app.routes.customer_timeline_routes import router as customer_timeline_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -64,3 +68,6 @@ app.include_router(sale_router)
 app.include_router(notification_router)
 app.include_router(inventory_router)
 app.include_router(analytics_router)
+app.include_router(customer_router)
+app.include_router(customer_profile_router)
+app.include_router(customer_timeline_router)

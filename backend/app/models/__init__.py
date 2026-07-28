@@ -10,3 +10,4 @@ from app.models.sale_item import SaleItem
 from app.models.notification import Notification
 from .inventory import Inventory
 from .inventory_movement import InventoryMovement
+from .customer_timeline import CustomerTimeline

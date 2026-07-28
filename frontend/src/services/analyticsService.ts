@@ -197,15 +197,35 @@ export const getInventoryValue = (params?: any) => {
 
 };
 
-// =========================================
-// Drill Down Analytics
-// =========================================
-export const getDrillDownAnalytics = (params?: any) => {
+export const getDrilldownCategories = () => {
 
     const token = localStorage.getItem("access_token");
 
-    return axios.get("/analytics/drill-down", {
-        params,
+    return axios.get("/analytics/drilldown/categories", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+};
+
+export const getDrilldownProducts = (categoryId: number) => {
+
+    const token = localStorage.getItem("access_token");
+
+    return axios.get(`/analytics/drilldown/products/${categoryId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+};
+
+export const getDrilldownSales = (productId: number) => {
+
+    const token = localStorage.getItem("access_token");
+
+    return axios.get(`/analytics/drilldown/sales/${productId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },

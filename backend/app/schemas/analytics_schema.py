@@ -85,6 +85,8 @@ class DrilldownCategoryResponse(BaseModel):
 
     name: str
 
+    total_products: int
+
     class Config:
 
         from_attributes = True
@@ -95,6 +97,8 @@ class DrilldownProductResponse(BaseModel):
     id: int
 
     name: str
+
+    total_sold: int
 
     class Config:
 

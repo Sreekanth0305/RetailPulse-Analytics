@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import CustomerProfile from "../components/CustomerProfile";
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
 import RegisterCompany from "../pages/RegisterCompany";
@@ -12,6 +13,7 @@ import SaleDetails from "../pages/SaleDetails";
 import Notifications from "../pages/Notifications";
 import Inventory from "../pages/Inventory";
 import Analytics from "../pages/Analytics";
+import Customers from "../pages/Customers";
 
 export default function AppRoutes() {
   return (
@@ -29,6 +31,9 @@ export default function AppRoutes() {
         <Route path="/notifications" element={<Notifications />}/>
         <Route path="/inventory" element={<Inventory />}/>
         <Route path="/analytics" element={<Analytics />}/>
+        <Route path="/customers" element={<Customers />} />
+
+        <Route path="/customer-profile/:customerId" element={<CustomerProfile />}/>
       </Routes>
     </BrowserRouter>
   );

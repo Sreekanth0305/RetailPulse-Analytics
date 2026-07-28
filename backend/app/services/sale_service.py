@@ -11,6 +11,7 @@ from app.models.sale_item import SaleItem
 from app.models.product import Product
 from app.models.category import Category
 from app.models.inventory import Inventory
+from app.models.customer import Customer
 
 from app.schemas.sale_schema import (
     SaleCreate,
@@ -19,6 +20,9 @@ from app.schemas.sale_schema import (
 
 from app.services.audit_service import create_audit_log
 from app.services.notification_service import create_notification
+from app.services.customer_purchase_summary_service import update_customer_purchase_summary
+from app.services.customer_service import update_customer_segment
+from app.services.customer_timeline_service import add_customer_activity
 
 LOW_STOCK_THRESHOLD = 5
 
@@ -32,22 +36,25 @@ def generate_invoice_number(
 
     year = datetime.now().year
 
-    total_sales = (
-
+    last_sale = (
         db.query(Sale)
-
         .filter(
             Sale.company_id == company_id
         )
-
-        .count()
-
+        .order_by(Sale.id.desc())
+        .first()
     )
 
-    next_number = total_sales + 1
+    if not last_sale:
+        return f"INV-{year}-000001"
+
+    last_number = int(
+        last_sale.invoice_number.split("-")[-1]
+    )
+
+    next_number = last_number + 1
 
     return f"INV-{year}-{next_number:06d}"
-
 # -----------------------------
 # Calculate Item Total
 # -----------------------------
@@ -136,9 +143,10 @@ def create_sale(
 
     db.add(db_sale)
 
-    db.commit()
+    db.flush()
 
-    db.refresh(db_sale)
+    print("Generated Invoice:", invoice_number)
+    print("Sale ID:", db_sale.id)
 
     # -----------------------------
     # Save Sale Items
@@ -350,8 +358,66 @@ def create_sale(
                 browser=request.headers.get("user-agent")
             )
 
+
+    print("Saving Sale:", db_sale.invoice_number)
     db.commit()
     db.refresh(db_sale)
+
+    update_customer_purchase_summary(
+
+        db=db,
+    
+        company_id=company_id,
+    
+        customer_name=sale.customer_name
+    
+    )
+
+    customer = (
+        db.query(Customer)
+        .filter(
+            Customer.company_id == company_id,
+            Customer.full_name == sale.customer_name
+        )
+        .first()
+    )
+    
+    if customer:
+    
+        previous_sales = (
+            db.query(Sale)
+            .filter(
+                Sale.company_id == company_id,
+                Sale.customer_name == sale.customer_name
+            )
+            .count()
+        )
+    
+        if previous_sales == 1:
+    
+            add_customer_activity(
+                db=db,
+                company_id=company_id,
+                customer_id=customer.id,
+                activity="First Purchase",
+                description=f"Invoice {invoice_number}"
+            )
+    
+        if grand_total >= 10000:
+    
+            add_customer_activity(
+                db=db,
+                company_id=company_id,
+                customer_id=customer.id,
+                activity="Large Purchase Completed",
+                description=f"Purchase Amount ₹{grand_total}"
+            )
+    
+        update_customer_segment(
+            db=db,
+            customer_name=sale.customer_name,
+            company_id=company_id
+        )
 
     create_audit_log(
         db=db,
@@ -764,6 +830,31 @@ def update_sale(
     db.commit()
     db.refresh(sale)
 
+    update_customer_purchase_summary(
+
+        db=db,
+    
+        company_id=company_id,
+    
+        customer_name=sale.customer_name
+    
+    )
+
+    customer = (
+        db.query(Customer)
+        .filter(
+            Customer.company_id == company_id,
+            Customer.full_name == sale.customer_name
+        )
+        .first()
+    )
+    
+    if customer:
+        update_customer_segment(
+            db=db,
+            customer_id=customer.id
+        )
+
     create_audit_log(
 
         db=db,
@@ -800,6 +891,8 @@ def delete_sale(
         company_id,
         sale_id
     )
+
+    customer_name = sale.customer_name
 
     items = (
 
@@ -865,6 +958,31 @@ def delete_sale(
     db.delete(sale)
     
     db.commit()
+
+    update_customer_purchase_summary(
+
+        db=db,
+    
+        company_id=company_id,
+    
+        customer_name=customer_name
+    
+    )
+
+    customer = (
+        db.query(Customer)
+        .filter(
+            Customer.company_id == company_id,
+            Customer.full_name == customer_name
+        )
+        .first()
+    )
+    
+    if customer:
+        update_customer_segment(
+            db=db,
+            customer_id=customer.id
+        )
     
     create_audit_log(
         db=db,
@@ -1060,3 +1178,24 @@ def sort_sales(
         )
 
     return query.all()
+
+# -----------------------------
+# Customer Purchase History
+# -----------------------------
+def get_customer_purchase_history(
+    db: Session,
+    company_id: int,
+    customer_name: str
+):
+
+    sales = (
+        db.query(Sale)
+        .filter(
+            Sale.company_id == company_id,
+            Sale.customer_name == customer_name
+        )
+        .order_by(Sale.sale_date.desc())
+        .all()
+    )
+
+    return sales

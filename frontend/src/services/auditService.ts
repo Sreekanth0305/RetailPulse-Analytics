@@ -15,3 +15,19 @@ export const getAuditLogs = () => {
     });
 
 };
+
+export const createAuditLog = (data: any) => {
+
+    const token = localStorage.getItem("access_token");
+
+    return axios.post(
+        "/audit-logs/",
+        data,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+};

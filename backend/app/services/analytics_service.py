@@ -1895,27 +1895,45 @@ def get_drilldown_categories(
     categories = (
 
         db.query(
-
-            Category.id,
-
-            Category.name
-
+    
+            Category.id.label("id"),
+    
+            Category.name.label("name"),
+    
+            func.count(Product.id).label("total_products")
+    
         )
-
+    
+        .outerjoin(
+    
+            Product,
+    
+            Product.category_id == Category.id
+    
+        )
+    
         .filter(
-
+    
             Category.company_id == company_id
-
+    
         )
-
-        .order_by(
-
+    
+        .group_by(
+    
+            Category.id,
+    
             Category.name
-
+    
         )
-
+    
+        .order_by(
+    
+            Category.name
+    
+        )
+    
         .all()
-
+    
     )
 
     return categories
@@ -1934,10 +1952,20 @@ def get_drilldown_products(
 
         db.query(
 
-            Product.id,
+            Product.id.label("id"),
 
-            Product.name
+            Product.name.label("name"),
 
+            func.coalesce(
+                func.sum(SaleItem.quantity),
+                0
+            ).label("total_sold")
+
+        )
+
+        .outerjoin(
+            SaleItem,
+            Product.id == SaleItem.product_id
         )
 
         .filter(
@@ -1945,6 +1973,14 @@ def get_drilldown_products(
             Product.company_id == company_id,
 
             Product.category_id == category_id
+
+        )
+
+        .group_by(
+
+            Product.id,
+
+            Product.name
 
         )
 
