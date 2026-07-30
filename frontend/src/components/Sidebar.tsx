@@ -12,7 +12,8 @@ import {
   History,
   PointOfSale,
   Warehouse,
-  Group
+  Group,
+  TrendingUp
 } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
@@ -115,6 +116,14 @@ function Sidebar() {
 
           <span>Analytics</span>
 
+        </li>
+
+        <li onClick={() => navigate("/forecast")}>
+
+          <TrendingUp />
+        
+          <span>Demand Forecast</span>
+        
         </li>
 
         <li onClick={() => navigate("/notifications")}>

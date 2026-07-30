@@ -11,3 +11,5 @@ from app.models.notification import Notification
 from .inventory import Inventory
 from .inventory_movement import InventoryMovement
 from .customer_timeline import CustomerTimeline
+from .demand_forecast import DemandForecast
+from .forecast_history import ForecastHistory

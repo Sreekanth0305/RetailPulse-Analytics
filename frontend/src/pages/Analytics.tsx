@@ -18,7 +18,14 @@ import {
     getInventoryValue,
     getDrilldownCategories,
     getDrilldownProducts,
-    getDrilldownSales
+    getDrilldownSales,
+    getForecastDashboard,
+    getHistoricalVsForecast,
+    getProductDemandTrend,
+    getCategoryDemandTrend,
+    getTopPredictedProducts,
+    getSeasonalSalesPattern
+
 } from "../services/analyticsService";
 
 import { getCustomerAnalytics } from "../services/customerService";
@@ -127,6 +134,18 @@ function Analytics() {
 
     const [customerAnalytics, setCustomerAnalytics] = useState<any>(null);
 
+    const [forecastDashboard, setForecastDashboard] = useState<any>(null);
+
+    const [historicalForecast, setHistoricalForecast] = useState<any[]>([]);
+
+    const [productTrend, setProductTrend] = useState<any[]>([]);
+    
+    const [categoryTrend, setCategoryTrend] = useState<any[]>([]);
+    
+    const [topForecastProducts, setTopForecastProducts] = useState<any[]>([]);
+    
+    const [seasonalPattern, setSeasonalPattern] = useState<any[]>([]);
+
     const getBrowser = () => {
         return navigator.userAgent;
     };
@@ -198,6 +217,64 @@ function Analytics() {
             console.log(error);
     
         }
+    
+    };
+
+    const loadForecastDashboard = async () => {
+
+        try {
+    
+            const response = await getForecastDashboard();
+    
+            setForecastDashboard(response.data);
+    
+        }
+    
+        catch (error) {
+    
+            console.log(error);
+    
+        }
+    
+    };
+
+    const loadHistoricalForecast = async () => {
+
+        const response = await getHistoricalVsForecast();
+    
+        setHistoricalForecast(response.data);
+    
+    };
+    
+    const loadProductTrend = async () => {
+    
+        const response = await getProductDemandTrend();
+    
+        setProductTrend(response.data);
+    
+    };
+    
+    const loadCategoryTrend = async () => {
+    
+        const response = await getCategoryDemandTrend();
+    
+        setCategoryTrend(response.data);
+    
+    };
+    
+    const loadTopForecastProducts = async () => {
+    
+        const response = await getTopPredictedProducts();
+    
+        setTopForecastProducts(response.data);
+    
+    };
+    
+    const loadSeasonalPattern = async () => {
+    
+        const response = await getSeasonalSalesPattern();
+    
+        setSeasonalPattern(response.data);
     
     };
 
@@ -550,6 +627,18 @@ function Analytics() {
             loadLowStockProducts(),
         
             loadOutOfStockProducts(),
+
+            loadForecastDashboard(),
+
+            loadHistoricalForecast(),
+
+            loadProductTrend(),
+            
+            loadCategoryTrend(),
+            
+            loadTopForecastProducts(),
+            
+            loadSeasonalPattern()
         
         ]);
     
@@ -838,6 +927,8 @@ function Analytics() {
         loadCategories();
 
         loadCustomerAnalytics();
+
+        loadForecastDashboard();
     
     }, []);
 
@@ -1026,57 +1117,54 @@ function Analytics() {
                 
                 </h2>
                 
+                <h2 className="section-title">
+                    Forecast Dashboard
+                </h2>
+                
                 <div className="cards">
                 
                     <div className="card">
-                
-                        <h3>Total Revenue</h3>
-                
+                        <h3>Total Predicted Demand</h3>
                         <h1>
-                
-                            ₹{Number(kpis.total_revenue).toLocaleString()}
-                
+                            {forecastDashboard?.total_predicted_demand ?? 0}
                         </h1>
-                
                     </div>
                 
                     <div className="card">
-                
-                        <h3>Total Orders</h3>
-                
+                        <h3>Products Expected To Run Out</h3>
                         <h1>
-                
-                            {kpis.total_orders}
-                
+                            {forecastDashboard?.products_expected_to_run_out ?? 0}
                         </h1>
-                
                     </div>
                 
                     <div className="card">
-                
-                        <h3>Products Sold</h3>
-                
+                        <h3>High Growth Products</h3>
                         <h1>
-                
-                            {kpis.total_products_sold}
-                
+                            {forecastDashboard?.high_growth_products ?? 0}
                         </h1>
-                
                     </div>
                 
                     <div className="card">
-                
-                        <h3>Average Order Value</h3>
-                
+                        <h3>Slow Moving Products</h3>
                         <h1>
-                
-                            ₹{Number(kpis.average_order_value).toFixed(2)}
-                
+                            {forecastDashboard?.slow_moving_products ?? 0}
                         </h1>
+                    </div>
                 
+                    <div className="card">
+                        <h3>Forecast Accuracy</h3>
+                        <h1>
+                            {forecastDashboard?.forecast_accuracy ?? 0}%
+                        </h1>
                     </div>
                 
                 </div>
+
+                <h2 className="section-title">
+
+                    Inventory Analytics
+                
+                </h2>
                 
                 <div className="cards">
                 
@@ -1867,6 +1955,164 @@ function Analytics() {
                 </div>
 
                 <h2 className="section-title">
+                    Forecast Charts
+                </h2>
+                
+                <div className="analytics-grid">
+                
+                    <div className="chart-card">
+                
+                        <h3>Predicted Demand By Product</h3>
+                
+                        <ResponsiveContainer width="100%" height={300}>
+                
+                            <BarChart
+                                data={topForecastProducts}
+                            >
+                
+                                <CartesianGrid strokeDasharray="3 3" />
+                
+                                <XAxis
+                                    dataKey="product"
+                                    angle={-30}
+                                    textAnchor="end"
+                                    interval={0}
+                                />
+                
+                                <YAxis />
+                
+                                <Tooltip />
+                
+                                <Bar
+                                    dataKey="predicted_demand"
+                                    fill="#1976d2"
+                                />
+                
+                            </BarChart>
+                
+                        </ResponsiveContainer>
+                
+                    </div>
+                
+                    <div className="chart-card">
+                
+                        <h3>Demand By Category</h3>
+                
+                        <ResponsiveContainer width="100%" height={300}>
+                
+                            <PieChart>
+                
+                                <Pie
+                                    data={categoryTrend}
+                                    dataKey="predicted_demand"
+                                    nameKey="category"
+                                    outerRadius={90}
+                                    label
+                                />
+                
+                                <Tooltip />
+                
+                                <Legend />
+                
+                            </PieChart>
+                
+                        </ResponsiveContainer>
+                
+                    </div>
+
+                    <div className="chart-card">
+                    
+                    <h3>Historical vs Forecast</h3>
+                    
+                    <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={historicalForecast}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                    
+                            <XAxis dataKey="product" />
+                    
+                            <YAxis />
+                    
+                            <Tooltip />
+                    
+                            <Legend />
+                    
+                            <Line
+                                type="monotone"
+                                dataKey="historical_sales"
+                                stroke="#1976d2"
+                                strokeWidth={3}
+                                name="Historical Sales"
+                            />
+                    
+                            <Line
+                                type="monotone"
+                                dataKey="forecast"
+                                stroke="#ff9800"
+                                strokeWidth={3}
+                                name="Forecast"
+                            />
+                        </LineChart>
+                    </ResponsiveContainer>
+                    
+                    </div>
+                
+                </div>
+
+                <div className="chart-card">
+
+                <h3>Product Demand Trend</h3>
+                
+                <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={productTrend}>
+                        <CartesianGrid strokeDasharray="3 3"/>
+                
+                        <XAxis dataKey="product"/>
+                
+                        <YAxis/>
+                
+                        <Tooltip/>
+                
+                        <Legend/>
+                
+                        <Line
+                            type="monotone"
+                            dataKey="predicted_demand"
+                            stroke="#4caf50"
+                            strokeWidth={3}
+                            name="Predicted Demand"
+                        />
+                    </LineChart>
+                </ResponsiveContainer>
+                
+                </div>
+
+                <div className="chart-card">
+
+                <h3>Seasonal Sales Pattern</h3>
+                
+                <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={seasonalPattern}>
+                        <CartesianGrid strokeDasharray="3 3"/>
+                
+                        <XAxis dataKey="month"/>
+                
+                        <YAxis/>
+                
+                        <Tooltip/>
+                
+                        <Legend/>
+                
+                        <Bar
+                            dataKey="sales"
+                            fill="#1976d2"
+                            name="Sales"
+                        />
+                    </BarChart>
+                </ResponsiveContainer>
+                
+                </div>
+
+                <h2 className="section-title">
                     Drill Down Analytics
                 </h2>
                 
@@ -1917,6 +2163,8 @@ function Analytics() {
                         </table>
                 
                     </div>
+
+
                 
                     <div className="chart-card">
                 

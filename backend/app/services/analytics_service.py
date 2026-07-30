@@ -8,6 +8,7 @@ from app.models.sale_item import SaleItem
 from app.models.inventory import Inventory
 from app.models.product import Product
 from app.models.category import Category
+from app.models.demand_forecast import DemandForecast
 
 
 # =====================================================
@@ -2053,3 +2054,72 @@ def get_drilldown_sales(
     )
 
     return sales
+
+def get_forecast_dashboard_kpis(
+    db: Session,
+    company_id: int
+):
+    total_predicted = (
+        db.query(
+            func.coalesce(
+                func.sum(DemandForecast.predicted_demand),
+                0
+            )
+        )
+        .filter(
+            DemandForecast.company_id == company_id
+        )
+        .scalar()
+    )
+
+    run_out_products = (
+        db.query(Product)
+        .join(
+            DemandForecast,
+            DemandForecast.product_id == Product.id
+        )
+        .filter(
+            Product.company_id == company_id,
+            Product.stock_quantity < DemandForecast.predicted_demand
+        )
+        .count()
+    )
+
+    high_growth = (
+        db.query(DemandForecast)
+        .filter(
+            DemandForecast.company_id == company_id,
+            DemandForecast.confidence_score >= 90
+        )
+        .count()
+    )
+
+    slow_moving = (
+        db.query(Product)
+        .filter(
+            Product.company_id == company_id,
+            Product.stock_quantity > 50
+        )
+        .count()
+    )
+
+    forecast_accuracy = (
+        db.query(
+            func.avg(DemandForecast.confidence_score)
+        )
+        .filter(
+            DemandForecast.company_id == company_id
+        )
+        .scalar()
+    )
+
+    return {
+        "total_predicted_demand": float(total_predicted),
+        "products_expected_to_run_out": run_out_products,
+        "high_growth_products": high_growth,
+        "slow_moving_products": slow_moving,
+        "forecast_accuracy": round(
+            float(forecast_accuracy or 0),
+            2
+        )
+    }

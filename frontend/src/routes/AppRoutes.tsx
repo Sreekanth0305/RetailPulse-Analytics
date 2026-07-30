@@ -14,6 +14,7 @@ import Notifications from "../pages/Notifications";
 import Inventory from "../pages/Inventory";
 import Analytics from "../pages/Analytics";
 import Customers from "../pages/Customers";
+import DemandForecast from "../pages/DemandForecast";
 
 export default function AppRoutes() {
   return (
@@ -32,6 +33,7 @@ export default function AppRoutes() {
         <Route path="/inventory" element={<Inventory />}/>
         <Route path="/analytics" element={<Analytics />}/>
         <Route path="/customers" element={<Customers />} />
+        <Route path="/forecast" element={<DemandForecast />}/>
 
         <Route path="/customer-profile/:customerId" element={<CustomerProfile />}/>
       </Routes>

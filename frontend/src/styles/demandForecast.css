@@ -1,0 +1,145 @@
+/* ===========================
+   Demand Forecast Page
+=========================== */
+
+.forecast-page {
+    margin-left: 250px;
+    margin-top: 70px;
+    padding: 25px;
+    background: #f5f7fb;
+    min-height: 100vh;
+}
+
+/* ===========================
+   Titles
+=========================== */
+
+.forecast-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 25px;
+}
+
+.section-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 18px;
+}
+
+/* ===========================
+   Filter Card
+=========================== */
+
+.filter-section {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+
+.forecast-filters {
+    margin-top: 10px;
+}
+
+/* ===========================
+   Cards
+=========================== */
+
+.forecast-card {
+    background: white;
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+
+/* ===========================
+   Tables
+=========================== */
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead {
+    background: #1976d2;
+    color: white;
+}
+
+.table th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Hover */
+
+.table-hover tbody tr:hover {
+    background: #f1f7ff;
+}
+
+/* ===========================
+   Export Buttons
+=========================== */
+
+.forecast-actions {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
+
+.forecast-actions button {
+    min-width: 210px;
+}
+
+/* ===========================
+   Responsive
+=========================== */
+
+@media (max-width: 992px) {
+
+    .forecast-page {
+
+        margin-left: 0;
+        margin-top: 70px;
+        padding: 15px;
+
+    }
+
+    .forecast-actions {
+
+        justify-content: center;
+
+    }
+
+}
+
+@media (max-width:768px){
+
+    .forecast-title{
+
+        font-size:24px;
+
+    }
+
+    .section-title{
+
+        font-size:20px;
+
+    }
+
+}

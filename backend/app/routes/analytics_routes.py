@@ -37,7 +37,8 @@ from app.services.analytics_service import (
     get_inventory_value_by_category,
     get_drilldown_categories,
     get_drilldown_products,
-    get_drilldown_sales
+    get_drilldown_sales,
+    get_forecast_dashboard_kpis
 )
 
 router = APIRouter(
@@ -736,4 +737,14 @@ def drilldown_sales_api(
 
         product_id
 
+    )
+
+@router.get("/forecast-dashboard")
+def forecast_dashboard(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    return get_forecast_dashboard_kpis(
+        db=db,
+        company_id=current_user.company_id
     )

@@ -23,6 +23,7 @@ from app.services.notification_service import create_notification
 from app.services.customer_purchase_summary_service import update_customer_purchase_summary
 from app.services.customer_service import update_customer_segment
 from app.services.customer_timeline_service import add_customer_activity
+from app.services.forecast_service import generate_forecast
 
 LOW_STOCK_THRESHOLD = 5
 
@@ -362,6 +363,15 @@ def create_sale(
     print("Saving Sale:", db_sale.invoice_number)
     db.commit()
     db.refresh(db_sale)
+
+# -----------------------------
+# Auto Refresh Forecast
+# -----------------------------
+    generate_forecast(
+        db=db,
+        company_id=company_id,
+        forecast_period="Next 30 days"
+    )
 
     update_customer_purchase_summary(
 
@@ -830,6 +840,12 @@ def update_sale(
     db.commit()
     db.refresh(sale)
 
+    generate_forecast(
+        db=db,
+        company_id=company_id,
+        forecast_period="Next 30 days"
+    )
+
     update_customer_purchase_summary(
 
         db=db,
@@ -958,6 +974,12 @@ def delete_sale(
     db.delete(sale)
     
     db.commit()
+
+    generate_forecast(
+        db=db,
+        company_id=company_id,
+        forecast_period="Next 30 days"
+    )
 
     update_customer_purchase_summary(
 

@@ -232,3 +232,81 @@ export const getDrilldownSales = (productId: number) => {
     });
 
 };
+
+// =========================================
+// Forecast Dashboard KPI
+// =========================================
+
+export const getForecastDashboard = () => {
+
+    const token = localStorage.getItem("access_token");
+
+    return axios.get("/analytics/forecast-dashboard", {
+
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+
+    });
+
+};
+
+export const getHistoricalVsForecast = () => {
+
+    const token = localStorage.getItem("access_token");
+
+    return axios.get("/forecast/charts/historical-vs-forecast", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+};
+
+export const getProductDemandTrend = () => {
+
+    const token = localStorage.getItem("access_token");
+
+    return axios.get("/forecast/charts/product-trend", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+};
+
+export const getCategoryDemandTrend = () => {
+
+    const token = localStorage.getItem("access_token");
+
+    return axios.get("/forecast/charts/category-trend", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+};
+
+export const getTopPredictedProducts = () => {
+
+    const token = localStorage.getItem("access_token");
+
+    return axios.get("/forecast/charts/top-products", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+};
+
+export const getSeasonalSalesPattern = () => {
+
+    const token = localStorage.getItem("access_token");
+
+    return axios.get("/forecast/charts/seasonal", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+};
