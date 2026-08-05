@@ -17,7 +17,8 @@ from app.services.customer_service import (
     update_customer,
     delete_customer,
     change_customer_status,
-    get_customer_analytics
+    get_customer_analytics,
+    rebuild_customer_purchase_summary
 )
 
 router = APIRouter(
@@ -124,6 +125,23 @@ def customer_analytics_api(
     return get_customer_analytics(
         db,
         current_user.company_id
+    )
+
+@router.post("/rebuild-purchase-summary")
+def rebuild_purchase_summary_api(
+
+    current_user=Depends(get_current_user),
+
+    db: Session = Depends(get_db)
+
+):
+
+    return rebuild_customer_purchase_summary(
+
+        db=db,
+
+        company_id=current_user.company_id
+
     )
 
 # ==========================================

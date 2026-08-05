@@ -59,6 +59,16 @@ class CustomerUpdate(BaseModel):
 
     status: str
 
+class CustomerPurchaseSummaryShort(BaseModel):
+
+    total_orders: int = 0
+
+    total_revenue: float = 0
+
+    class Config:
+
+        from_attributes = True
+
 
 # -----------------------------
 # Customer Response
@@ -98,6 +108,8 @@ class CustomerResponse(BaseModel):
     created_at: datetime
 
     updated_at: datetime
+
+    purchase_summary: CustomerPurchaseSummaryShort | None = None
 
     class Config:
 

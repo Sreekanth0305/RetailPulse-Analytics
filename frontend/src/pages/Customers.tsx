@@ -39,9 +39,13 @@ function Customers() {
 
     const [openForm,setOpenForm]=useState(false);
 
+    const [loading, setLoading] = useState(false);
+
     const [selectedCustomer,setSelectedCustomer]=useState<any>(null);
 
     const loadCustomers = async () => {
+
+        setLoading(true);
 
         try {
     
@@ -73,6 +77,12 @@ function Customers() {
     
             console.log(error);
     
+        }
+
+        finally {
+
+            setLoading(false);
+
         }
     
     };
@@ -287,6 +297,17 @@ function Customers() {
                 
                 </div>
 
+                {
+                    loading &&
+                
+                    <div className="loading">
+                
+                        Loading Customers...
+                
+                    </div>
+                
+                }
+
                 <table className="customers-table">
 
                     <thead>
@@ -307,6 +328,10 @@ function Customers() {
 
                             <th>Segment</th>
 
+                            <th>Total Orders</th>
+
+                            <th>Total Spend</th>
+
                             <th>Status</th>
 
                             <th>Actions</th>
@@ -318,7 +343,25 @@ function Customers() {
                     <tbody>
 
                         {
-
+                        
+                        customers.length === 0 ?
+                        
+                        (
+                        
+                        <tr>
+                        
+                        <td colSpan={11} className="empty-state">
+                        
+                        No Customers Found
+                        
+                        </td>
+                        
+                        </tr>
+                        
+                        )
+                        
+                        :
+                        
                             customers.map((customer) => (
 
                                 <tr key={customer.id}>
@@ -360,9 +403,21 @@ function Customers() {
                                     </td>
 
                                     <td>
-
-                                        {customer.segment}
-
+                                        <span
+                                            className={`segment-badge ${customer.segment
+                                                ?.toLowerCase()
+                                                .replace(/\s+/g, "-")}`}
+                                        >
+                                            {customer.segment}
+                                        </span>
+                                    </td>
+                                    
+                                    <td>
+                                        {customer.purchase_summary?.total_orders ?? 0}
+                                    </td>
+                                    
+                                    <td>
+                                        ₹{customer.purchase_summary?.total_revenue ?? 0}
                                     </td>
 
                                     <td>

@@ -20,32 +20,124 @@
 }
 
 .search-box{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
     margin-bottom:20px;
 }
 
-.search-box input{
-    width:320px;
+.search-box input,
+.search-box select{
     padding:10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    min-width:170px;
 }
 
 .customers-table{
     width:100%;
     border-collapse:collapse;
-}
-
-.customers-table th,
-.customers-table td{
-    border:1px solid #ddd;
-    padding:10px;
+    background:white;
 }
 
 .customers-table th{
     background:#1976d2;
     color:white;
+    padding:12px;
+}
+
+.customers-table td{
+    padding:12px;
+    border-bottom:1px solid #ececec;
 }
 
 .customers-table button{
-    margin-right:6px;
-    padding:5px 10px;
+    margin-right:5px;
+    margin-bottom:5px;
+    padding:6px 12px;
+    border:none;
+    border-radius:5px;
     cursor:pointer;
+    background:#1976d2;
+    color:white;
+}
+
+.customers-table button:hover{
+    background:#135ba1;
+}
+
+.segment-badge{
+
+    padding:6px 12px;
+
+    border-radius:20px;
+
+    color:white;
+
+    font-size:13px;
+
+    font-weight:bold;
+
+}
+
+.segment-badge.new-customer{
+
+    background:#607d8b;
+
+}
+
+.segment-badge.regular-customer{
+
+    background:#2196f3;
+
+}
+
+.segment-badge.loyal-customer{
+
+    background:#4caf50;
+
+}
+
+.segment-badge.vip-customer{
+
+    background:#ff9800;
+
+}
+
+.loading{
+
+    text-align:center;
+
+    padding:40px;
+
+    font-size:20px;
+
+}
+
+.empty{
+
+    text-align:center;
+
+    padding:30px;
+
+    color:#888;
+
+}
+
+@media(max-width:900px){
+
+    .customers-page{
+
+        margin-left:0;
+
+    }
+
+    .customers-table{
+
+        display:block;
+
+        overflow-x:auto;
+
+    }
+
 }

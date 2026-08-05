@@ -52,6 +52,8 @@ function CustomerForm({
 
     });
 
+    const [errors, setErrors] = useState<any>({});
+
     useEffect(() => {
 
         if (initialData) {
@@ -144,6 +146,45 @@ function CustomerForm({
 
     }
 
+    const validateForm = () => {
+
+        const newErrors: any = {};
+    
+        if (!form.full_name.trim()) {
+            newErrors.full_name = "Full Name is required";
+        }
+    
+        if (!form.email.trim()) {
+            newErrors.email = "Email is required";
+        }
+        else if (
+            !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email)
+        ) {
+            newErrors.email = "Invalid Email";
+        }
+    
+        if (!form.phone.trim()) {
+            newErrors.phone = "Phone is required";
+        }
+        else if (!/^[0-9]{10}$/.test(form.phone)) {
+            newErrors.phone = "Phone must be 10 digits";
+        }
+    
+        if (!form.customer_type) {
+            newErrors.customer_type = "Customer Type required";
+        }
+    
+        if (!form.preferred_sales_channel) {
+            newErrors.preferred_sales_channel =
+                "Sales Channel required";
+        }
+    
+        setErrors(newErrors);
+    
+        return Object.keys(newErrors).length === 0;
+    
+    };
+
     return(
 
         <div className="modal-overlay">
@@ -163,6 +204,12 @@ function CustomerForm({
                     onChange={handleChange}
                 />
 
+                {errors.full_name && (
+                    <small style={{color:"red"}}>
+                        {errors.full_name}
+                    </small>
+                )}
+
                 <input
                     name="email"
                     placeholder="Email"
@@ -170,12 +217,24 @@ function CustomerForm({
                     onChange={handleChange}
                 />
 
+                {errors.email && (
+                    <small style={{color:"red"}}>
+                        {errors.email}
+                    </small>
+                )}
+
                 <input
                     name="phone"
                     placeholder="Phone"
                     value={form.phone}
                     onChange={handleChange}
                 />
+
+                {errors.phone && (
+                    <small style={{color:"red"}}>
+                        {errors.phone}
+                    </small>
+                )}
 
                 <input
                     type="date"
@@ -264,6 +323,12 @@ function CustomerForm({
 
                 </select>
 
+                {errors.customer_type && (
+                    <small style={{color:"red"}}>
+                        {errors.customer_type}
+                    </small>
+                )}
+
                 <select
                     name="preferred_sales_channel"
                     value={form.preferred_sales_channel}
@@ -290,6 +355,12 @@ function CustomerForm({
 
                 </select>
 
+                {errors.preferred_sales_channel && (
+                    <small style={{color:"red"}}>
+                        {errors.preferred_sales_channel}
+                    </small>
+                )}
+
                 <select
                     name="status"
                     value={form.status}
@@ -313,17 +384,18 @@ function CustomerForm({
                 <div className="modal-buttons">
 
                     <button
-
-                        onClick={async()=>{
+                        onClick={async () => {
+                    
+                            if (!validateForm()) {
+                                return;
+                            }
                     
                             await onSubmit(form);
                     
                         }}
-                    
                     >
-                    
                         Save
-                    
+
                     </button>
 
                     <button

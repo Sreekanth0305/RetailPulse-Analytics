@@ -156,4 +156,13 @@ def update_customer_purchase_summary(
         else None
     )
 
+    print("========== Purchase Summary ==========")
+    print("Customer Name:", customer_name)
+    print("Customer Found:", customer)
+    print("Total Orders:", total_orders)
+    print("Total Revenue:", total_revenue)
+    print("Saving Summary...")
+
     db.commit()
+
+    print("Summary Saved")

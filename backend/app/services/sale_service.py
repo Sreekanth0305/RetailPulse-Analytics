@@ -370,7 +370,9 @@ def create_sale(
     generate_forecast(
         db=db,
         company_id=company_id,
-        forecast_period="Next 30 days"
+        user_id=user_id,
+        forecast_period="Next 30 days",
+        request=request
     )
 
     update_customer_purchase_summary(
@@ -379,7 +381,7 @@ def create_sale(
     
         company_id=company_id,
     
-        customer_name=sale.customer_name
+        customer_name=db_sale.customer_name
     
     )
 
@@ -843,9 +845,10 @@ def update_sale(
     generate_forecast(
         db=db,
         company_id=company_id,
-        forecast_period="Next 30 days"
+        user_id=user_id,
+        forecast_period="Next 30 days",
+        request=request
     )
-
     update_customer_purchase_summary(
 
         db=db,
@@ -868,7 +871,8 @@ def update_sale(
     if customer:
         update_customer_segment(
             db=db,
-            customer_id=customer.id
+            customer_name=customer.full_name,
+            company_id=company_id
         )
 
     create_audit_log(
@@ -978,9 +982,10 @@ def delete_sale(
     generate_forecast(
         db=db,
         company_id=company_id,
-        forecast_period="Next 30 days"
+        user_id=user_id,
+        forecast_period="Next 30 days",
+        request=request
     )
-
     update_customer_purchase_summary(
 
         db=db,
@@ -1003,7 +1008,8 @@ def delete_sale(
     if customer:
         update_customer_segment(
             db=db,
-            customer_id=customer.id
+            customer_name=customer.full_name,
+            company_id=company_id
         )
     
     create_audit_log(

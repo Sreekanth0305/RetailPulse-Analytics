@@ -5,7 +5,8 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
-    Text
+    Text,
+    Boolean
 )
 
 from sqlalchemy.orm import relationship
@@ -95,6 +96,12 @@ class Customer(Base):
     status = Column(
         String(20),
         default="Active"
+    )
+
+    is_deleted = Column(
+        Boolean,
+        default=False,
+        nullable=False
     )
 
     segment = Column(

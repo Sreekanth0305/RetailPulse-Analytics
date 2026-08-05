@@ -57,7 +57,9 @@ def create_customer(
 
             Customer.company_id == company_id,
 
-            Customer.email == customer.email
+            Customer.email == customer.email,
+
+            Customer.is_deleted == False
 
         )
         .first()
@@ -79,7 +81,9 @@ def create_customer(
 
             Customer.company_id == company_id,
 
-            Customer.phone == customer.phone
+            Customer.phone == customer.phone,
+
+            Customer.is_deleted == False
 
         )
         .first()
@@ -123,7 +127,9 @@ def create_customer(
 
         preferred_sales_channel=customer.preferred_sales_channel,
 
-        status="Active"
+        status="Active",
+
+        segment="New Customer"
 
     )
 
@@ -215,7 +221,8 @@ def get_customers(
             Customer.id == CustomerPurchaseSummary.customer_id
         )
         .filter(
-            Customer.company_id == company_id
+            Customer.company_id == company_id,
+            Customer.is_deleted == False
         )
     )
 
@@ -320,7 +327,25 @@ def get_customers(
             Customer.created_at.desc()
         )
 
-    return query.all()
+    customers = query.all()
+
+    result = []
+    
+    for customer in customers:
+    
+        summary = (
+            db.query(CustomerPurchaseSummary)
+            .filter(
+                CustomerPurchaseSummary.customer_id == customer.id
+            )
+            .first()
+        )
+    
+        customer.purchase_summary = summary
+    
+        result.append(customer)
+    
+    return result
 
 
 def get_customer_by_id(
@@ -341,7 +366,10 @@ def get_customer_by_id(
 
             Customer.company_id == company_id,
 
-            Customer.id == customer_id
+            Customer.id == customer_id,
+
+            Customer.is_deleted == False
+
 
         )
 
@@ -397,7 +425,9 @@ def update_customer(
 
             Customer.email == customer_data.email,
 
-            Customer.id != customer_id
+            Customer.id != customer_id,
+
+            Customer.is_deleted == False
 
         )
 
@@ -425,7 +455,9 @@ def update_customer(
 
             Customer.phone == customer_data.phone,
 
-            Customer.id != customer_id
+            Customer.id != customer_id,
+
+            Customer.is_deleted == False
 
         )
 
@@ -571,9 +603,13 @@ def delete_customer(
 
     )
 
-    db.delete(customer)
+    customer.is_deleted = True
 
+    customer.status = "Inactive"
+    
     db.commit()
+    
+    db.refresh(customer)
 
     return {
 
@@ -663,12 +699,14 @@ def change_customer_status(
 def get_customer_analytics(db: Session, company_id: int):
 
     total_customers = db.query(Customer).filter(
-        Customer.company_id == company_id
+        Customer.company_id == company_id,
+        Customer.is_deleted == False
     ).count()
 
     active_customers = db.query(Customer).filter(
         Customer.company_id == company_id,
-        Customer.status == "Active"
+        Customer.status == "Active",
+        Customer.is_deleted == False
     ).count()
 
     current_month = datetime.utcnow().month
@@ -676,6 +714,7 @@ def get_customer_analytics(db: Session, company_id: int):
 
     new_customers = db.query(Customer).filter(
         Customer.company_id == company_id,
+        Customer.is_deleted == False,
         func.extract("month", Customer.created_at) == current_month,
         func.extract("year", Customer.created_at) == current_year
     ).count()
@@ -709,7 +748,7 @@ def get_customer_analytics(db: Session, company_id: int):
         db.query(
             Customer.full_name,
             CustomerPurchaseSummary.total_orders,
-            CustomerPurchaseSummary.total_revenue
+            CustomerPurchaseSummary.total_revenue,
         )
         .join(
             CustomerPurchaseSummary,
@@ -717,7 +756,8 @@ def get_customer_analytics(db: Session, company_id: int):
             CustomerPurchaseSummary.customer_id
         )
         .filter(
-            Customer.company_id == company_id
+            Customer.company_id == company_id,
+            Customer.is_deleted == False
         )
         .order_by(
             CustomerPurchaseSummary.total_revenue.desc()
@@ -729,14 +769,15 @@ def get_customer_analytics(db: Session, company_id: int):
     customer_types = (
         db.query(
             Customer.customer_type,
-            func.sum(CustomerPurchaseSummary.total_revenue).label("revenue")
+            func.count(Customer.id).label("count")
         )
         .join(
             CustomerPurchaseSummary,
             Customer.id == CustomerPurchaseSummary.customer_id
         )
         .filter(
-            Customer.company_id == company_id
+            Customer.company_id == company_id,
+            Customer.is_deleted == False
         )
         .group_by(
             Customer.customer_type
@@ -750,7 +791,8 @@ def get_customer_analytics(db: Session, company_id: int):
             func.count(Customer.id).label("customers")
         )
         .filter(
-            Customer.company_id == company_id
+            Customer.company_id == company_id,
+            Customer.is_deleted == False
         )
         .group_by(
             func.date_format(Customer.created_at, "%Y-%m")
@@ -789,7 +831,7 @@ def get_customer_analytics(db: Session, company_id: int):
         "customer_types": [
             {
                 "customer_type": row.customer_type,
-                "count": row[1]
+                "count": row.count
             }
             for row in customer_types
         ],
@@ -815,7 +857,8 @@ def update_customer_segment(
         db.query(Customer)
         .filter(
             Customer.full_name == customer_name,
-            Customer.company_id == company_id
+            Customer.company_id == company_id,
+            Customer.is_deleted == False
         )
         .first()
     )
@@ -853,3 +896,37 @@ def update_customer_segment(
     customer.segment = segment
 
     db.commit()
+
+from app.services.customer_purchase_summary_service import update_customer_purchase_summary
+
+def rebuild_customer_purchase_summary(
+    db: Session,
+    company_id: int
+):
+
+    customers = (
+        db.query(Customer)
+        .filter(
+            Customer.company_id == company_id,
+            Customer.is_deleted == False
+        )
+        .all()
+    )
+
+    for customer in customers:
+
+        update_customer_purchase_summary(
+            db=db,
+            company_id=company_id,
+            customer_name=customer.full_name
+        )
+
+        update_customer_segment(
+            db=db,
+            customer_name=customer.full_name,
+            company_id=company_id
+        )
+
+    return {
+        "message": "Customer Purchase Summary Rebuilt Successfully"
+    }  
