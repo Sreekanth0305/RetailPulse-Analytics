@@ -56,9 +56,34 @@ class Sale(Base):
         nullable=False
     )
 
+    subtotal = Column(
+        Float,
+        default=0
+    )
+    
+    discount = Column(
+        Float,
+        default=0
+    )
+    
+    tax = Column(
+        Float,
+        default=0
+    )
+
     total_amount = Column(
         Float,
         nullable=False
+    )
+
+    payment_status = Column(
+        String(30),
+        default="Paid"
+    )
+    
+    notes = Column(
+        String(500),
+        nullable=True
     )
 
     created_by = Column(

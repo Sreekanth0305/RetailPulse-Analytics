@@ -1,3 +1,18 @@
+import csv
+import io
+from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse
+
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Table,
+    TableStyle,
+    Paragraph
+)
+
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+
 from datetime import datetime
 
 from fastapi import HTTPException, Request
@@ -115,31 +130,88 @@ def create_sale(
     request: Request
 ):
 
+    # -----------------------------
+    # Validate Customer Exists
+    # -----------------------------
+    customer = (
+        db.query(Customer)
+        .filter(
+            Customer.company_id == company_id,
+            Customer.full_name == sale.customer_name,
+            Customer.is_deleted == False,
+            Customer.status == "Active"
+        )
+        .first()
+    )
+
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail="Customer not found."
+        )
+
     invoice_number = generate_invoice_number(
         db,
         company_id
     )
 
+    # -----------------------------
+    # Duplicate Invoice Check
+    # -----------------------------
+    invoice_exists = (
+        db.query(Sale)
+        .filter(
+            Sale.company_id == company_id,
+            Sale.invoice_number == invoice_number
+        )
+        .first()
+    )
+
+    if invoice_exists:
+        raise HTTPException(
+            status_code=400,
+            detail="Duplicate invoice number."
+        )
+
     grand_total = calculate_sale_total(
         sale.items
     )
 
+    subtotal = 0
+    total_discount = 0
+    total_tax = 0
+
+    for item in sale.items:
+        subtotal += item.quantity * item.unit_price
+        total_discount += item.discount
+        total_tax += item.tax
+
     db_sale = Sale(
 
         company_id=company_id,
-
+    
         invoice_number=invoice_number,
-
+    
         customer_name=sale.customer_name,
-
+    
         sales_channel=sale.sales_channel,
-
+    
         payment_method=sale.payment_method,
-
+    
+        subtotal=subtotal,
+    
+        discount=total_discount,
+    
+        tax=total_tax,
+    
         total_amount=grand_total,
-
+    
+        payment_status="Paid",
+    
+        notes=sale.notes if hasattr(sale, "notes") else None,
+    
         created_by=user_id
-
+    
     )
 
     db.add(db_sale)
@@ -490,7 +562,12 @@ def get_sales(
             "sale_date": sale.sale_date,
             "sales_channel": sale.sales_channel,
             "payment_method": sale.payment_method,
-            "total_amount": sale.total_amount
+            "subtotal": sale.subtotal,
+            "discount": sale.discount,
+            "tax": sale.tax,
+            "total_amount": sale.total_amount,
+            "payment_status": sale.payment_status,
+            "notes": sale.notes
         })
 
     return result
@@ -612,23 +689,19 @@ def get_sale_details(
         })
 
     return {
-
         "id": sale.id,
-
         "invoice_number": sale.invoice_number,
-
         "customer_name": sale.customer_name,
-
         "sale_date": sale.sale_date,
-
         "sales_channel": sale.sales_channel,
-
         "payment_method": sale.payment_method,
-
+        "subtotal": sale.subtotal,
+        "discount": sale.discount,
+        "tax": sale.tax,
         "total_amount": sale.total_amount,
-
+        "payment_status": sale.payment_status,
+        "notes": sale.notes,
         "items": result
-
     }
 
 # -----------------------------
@@ -680,13 +753,26 @@ def update_sale(
 
     grand_total = calculate_sale_total(data.items)
 
+    subtotal = 0
+    total_discount = 0
+    total_tax = 0
+    
+    for item in data.items:
+        subtotal += item.quantity * item.unit_price
+        total_discount += item.discount
+        total_tax += item.tax
+    
     sale.customer_name = data.customer_name
-
     sale.sales_channel = data.sales_channel
-
     sale.payment_method = data.payment_method
-
+    
+    sale.subtotal = subtotal
+    sale.discount = total_discount
+    sale.tax = total_tax
     sale.total_amount = grand_total
+    
+    if hasattr(data, "notes"):
+        sale.notes = data.notes
 
     for item in data.items:
 
@@ -714,6 +800,56 @@ def update_sale(
 
                 detail="Product not found."
 
+            )
+
+        if item.quantity <= 0:
+
+            raise HTTPException(
+        
+                status_code=400,
+        
+                detail="Quantity must be greater than zero."
+        
+            )
+        
+        if item.unit_price < 0:
+        
+            raise HTTPException(
+        
+                status_code=400,
+        
+                detail="Unit price cannot be negative."
+        
+            )
+        
+        if item.discount < 0:
+        
+            raise HTTPException(
+        
+                status_code=400,
+        
+                detail="Discount cannot be negative."
+        
+            )
+        
+        if item.tax < 0:
+        
+            raise HTTPException(
+        
+                status_code=400,
+        
+                detail="Tax cannot be negative."
+        
+            )
+        
+        if item.discount > (item.quantity * item.unit_price):
+        
+            raise HTTPException(
+        
+                status_code=400,
+        
+                detail="Discount cannot exceed product value."
+        
             )
         
         if item.quantity > product.stock_quantity:
@@ -1227,3 +1363,296 @@ def get_customer_purchase_history(
     )
 
     return sales
+
+# -----------------------------
+# Export Invoice CSV
+# -----------------------------
+def export_invoice_csv(
+    db: Session,
+    company_id: int,
+    sale_id: int
+):
+
+    sale = get_sale(
+        db,
+        company_id,
+        sale_id
+    )
+
+    items = (
+        db.query(
+            SaleItem,
+            Product.name
+        )
+        .join(
+            Product,
+            SaleItem.product_id == Product.id
+        )
+        .filter(
+            SaleItem.sale_id == sale.id
+        )
+        .all()
+    )
+
+    output = io.StringIO()
+
+    writer = csv.writer(output)
+
+    writer.writerow([
+        "Invoice Number",
+        sale.invoice_number
+    ])
+
+    writer.writerow([
+        "Customer",
+        sale.customer_name
+    ])
+
+    writer.writerow([
+        "Sale Date",
+        sale.sale_date
+    ])
+
+    writer.writerow([
+        "Payment Method",
+        sale.payment_method
+    ])
+
+    writer.writerow([])
+
+    writer.writerow([
+        "Product",
+        "Quantity",
+        "Unit Price",
+        "Discount",
+        "Tax",
+        "Total"
+    ])
+
+    for item, product_name in items:
+
+        writer.writerow([
+            product_name,
+            item.quantity,
+            item.unit_price,
+            item.discount,
+            item.tax,
+            item.total
+        ])
+
+    writer.writerow([])
+
+    writer.writerow([
+        "",
+        "",
+        "",
+        "",
+        "Grand Total",
+        sale.total_amount
+    ])
+
+    output.seek(0)
+
+    return StreamingResponse(
+
+        iter([output.getvalue()]),
+
+        media_type="text/csv",
+
+        headers={
+            "Content-Disposition":
+            f"attachment; filename={sale.invoice_number}.csv"
+        }
+
+    )
+
+# -----------------------------
+# Export Invoice PDF
+# -----------------------------
+def export_invoice_pdf(
+    db: Session,
+    company_id: int,
+    sale_id: int
+):
+
+    sale = get_sale(
+        db,
+        company_id,
+        sale_id
+    )
+
+    items = (
+        db.query(
+            SaleItem,
+            Product.name
+        )
+        .join(
+            Product,
+            Product.id == SaleItem.product_id
+        )
+        .filter(
+            SaleItem.sale_id == sale.id
+        )
+        .all()
+    )
+
+    file_name = f"Invoice_{sale.invoice_number}.pdf"
+
+    doc = SimpleDocTemplate(file_name)
+
+    styles = getSampleStyleSheet()
+
+    elements = []
+
+    elements.append(
+        Paragraph(
+            "<b>Invoice</b>",
+            styles["Title"]
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            f"Invoice Number : {sale.invoice_number}",
+            styles["Normal"]
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            f"Customer : {sale.customer_name}",
+            styles["Normal"]
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            f"Sale Date : {sale.sale_date}",
+            styles["Normal"]
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            f"Payment Method : {sale.payment_method}",
+            styles["Normal"]
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            f"Sales Channel : {sale.sales_channel}",
+            styles["Normal"]
+        )
+    )
+
+    data = [[
+        "Product",
+        "Qty",
+        "Price",
+        "Discount",
+        "Tax",
+        "Total"
+    ]]
+
+    for item, product_name in items:
+
+        data.append([
+            product_name,
+            item.quantity,
+            item.unit_price,
+            item.discount,
+            item.tax,
+            item.total
+        ])
+
+    data.append([
+        "",
+        "",
+        "",
+        "",
+        "Grand Total",
+        sale.total_amount
+    ])
+
+    table = Table(data)
+
+    table.setStyle(
+
+        TableStyle([
+
+            ("GRID",(0,0),(-1,-1),1,colors.black),
+
+            ("BACKGROUND",(0,0),(-1,0),colors.lightgrey),
+
+            ("BACKGROUND",(-2,-1),(-1,-1),colors.beige),
+
+            ("FONTNAME",(0,0),(-1,0),"Helvetica-Bold"),
+
+            ("ALIGN",(0,0),(-1,-1),"CENTER")
+
+        ])
+
+    )
+
+    elements.append(table)
+
+    doc.build(elements)
+
+    return FileResponse(
+
+        path=file_name,
+
+        media_type="application/pdf",
+
+        filename=file_name
+
+    )
+
+# -----------------------------
+# Sales Dashboard Summary
+# -----------------------------
+def get_sales_dashboard_summary(
+    db: Session,
+    company_id: int
+):
+
+    total_sales = (
+        db.query(func.count(Sale.id))
+        .filter(Sale.company_id == company_id)
+        .scalar()
+    )
+
+    total_revenue = (
+        db.query(func.sum(Sale.total_amount))
+        .filter(Sale.company_id == company_id)
+        .scalar()
+    ) or 0
+
+    average_sale = (
+        total_revenue / total_sales
+        if total_sales > 0
+        else 0
+    )
+
+    return {
+        "total_sales": total_sales,
+        "total_revenue": total_revenue,
+        "average_sale": round(average_sale, 2)
+    }
+
+# -----------------------------
+# Invoice Preview
+# -----------------------------
+def preview_invoice(
+    db: Session,
+    company_id: int,
+    sale_id: int
+):
+
+    return get_sale_details(
+        db,
+        company_id,
+        sale_id
+    )
+

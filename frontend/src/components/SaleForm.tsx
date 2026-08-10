@@ -63,7 +63,7 @@ const SaleForm = ({
       category_id: 0,
       category_name: "",
 
-      quantity: 1,
+      quantity: 0,
 
       unit_price: 0,
 
@@ -236,7 +236,7 @@ const addItem = () => {
       product_id: 0,
       category_id: 0,
       category_name: "",
-      quantity: 1,
+      quantity: 0,
       unit_price: 0,
       discount: 0,
       tax: 0,
@@ -447,6 +447,8 @@ placeholder="Category"
 
 type="number"
 
+min="0"
+
 value={item.quantity}
 
 onChange={(e)=>
@@ -457,7 +459,7 @@ index,
 
 "quantity",
 
-Number(e.target.value)
+Math.max(0, Number(e.target.value))
 
 )
 
@@ -479,6 +481,8 @@ readOnly
 
 type="number"
 
+min="0"
+
 value={item.discount}
 
 onChange={(e)=>
@@ -489,7 +493,7 @@ index,
 
 "discount",
 
-Number(e.target.value)
+Math.max(0, Number(e.target.value))
 
 )
 
@@ -501,6 +505,8 @@ Number(e.target.value)
 
 type="number"
 
+min="0"
+
 value={item.tax}
 
 onChange={(e)=>
@@ -511,7 +517,7 @@ index,
 
 "tax",
 
-Number(e.target.value)
+Math.max(0, Number(e.target.value))
 
 )
 

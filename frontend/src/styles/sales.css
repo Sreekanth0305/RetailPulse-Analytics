@@ -301,3 +301,161 @@ button {
     }
 
 }
+
+/* Sales Action Buttons */
+
+/* .sales-table button {
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  margin: 2px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+} */
+
+/* View */
+/* .sales-table button:nth-child(1) {
+  background-color: #2563eb;
+} */
+
+/* Edit */
+/* .sales-table button:nth-child(2) {
+  background-color: #f59e0b;
+} */
+
+/* Delete */
+/* .sales-table button:nth-child(3) {
+  background-color: #dc2626;
+} */
+
+/* Invoice */
+/* .sales-table button:nth-child(4) {
+  background-color: #7C3AED;
+} */
+
+/* PDF */
+/* .sales-table button:nth-child(5) {
+  background-color: #048787;
+} */
+
+/* CSV */
+/* .sales-table button:nth-child(6) {
+  background-color: #16a34a;
+} */
+
+
+/* ==============================
+   Sales Action Buttons
+   ============================== */
+
+.sales-table td:last-child {
+  width: 220px;
+  min-width: 220px;
+}
+
+/* Make actions a 3 x 2 grid */
+.sales-table td:last-child {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  align-items: center;
+}
+
+/* Common button style */
+.sales-table td:last-child button {
+  color: white;
+  border: none;
+  padding: 7px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color 0.2s ease,
+              transform 0.15s ease,
+              box-shadow 0.2s ease;
+}
+
+/* ==============================
+   View
+   ============================== */
+
+.sales-table td:last-child button:nth-child(1) {
+  background-color: #2563eb;
+}
+
+.sales-table td:last-child button:nth-child(1):hover {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+/* ==============================
+   Edit
+   ============================== */
+
+.sales-table td:last-child button:nth-child(2) {
+  background-color: #f59e0b;
+}
+
+.sales-table td:last-child button:nth-child(2):hover {
+  background-color: #d97706;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+}
+
+/* ==============================
+   Delete
+   ============================== */
+
+.sales-table td:last-child button:nth-child(3) {
+  background-color: #dc2626;
+}
+
+.sales-table td:last-child button:nth-child(3):hover {
+  background-color: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+}
+
+/* ==============================
+   Invoice
+   ============================== */
+
+.sales-table td:last-child button:nth-child(4) {
+  background-color: #7c3aed;
+}
+
+.sales-table td:last-child button:nth-child(4):hover {
+  background-color: #6d28d9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3);
+}
+
+/* ==============================
+   PDF
+   ============================== */
+
+.sales-table td:last-child button:nth-child(5) {
+  background-color: #048787;
+}
+
+.sales-table td:last-child button:nth-child(5):hover {
+  background-color: #066b75;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(8, 127, 140, 0.3);
+}
+
+/* ==============================
+   CSV
+   ============================== */
+
+.sales-table td:last-child button:nth-child(6) {
+  background-color: #16a34a;
+}
+
+.sales-table td:last-child button:nth-child(6):hover {
+  background-color: #15803d;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);
+}

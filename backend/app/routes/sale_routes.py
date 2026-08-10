@@ -21,7 +21,10 @@ from app.services.sale_service import (
     search_sales,
     filter_sales,
     sort_sales,
-    get_customer_purchase_history
+    get_customer_purchase_history,
+    export_invoice_csv,
+    export_invoice_pdf,
+    preview_invoice,
 )
 
 router = APIRouter(
@@ -268,5 +271,79 @@ def delete_sale_api(
         sale_id,
 
         request
+
+    )
+
+# -----------------------------
+# Invoice Preview
+# -----------------------------
+@router.get("/{sale_id}/invoice")
+def invoice_preview_api(
+
+    sale_id: int,
+
+    current_user=Depends(get_current_user),
+
+    db: Session = Depends(get_db)
+
+):
+
+    return preview_invoice(
+
+        db,
+
+        current_user.company_id,
+
+        sale_id
+
+    )
+
+
+# -----------------------------
+# Export Invoice CSV
+# -----------------------------
+@router.get("/{sale_id}/invoice/csv")
+def export_invoice_csv_api(
+
+    sale_id: int,
+
+    current_user=Depends(get_current_user),
+
+    db: Session = Depends(get_db)
+
+):
+
+    return export_invoice_csv(
+
+        db,
+
+        current_user.company_id,
+
+        sale_id
+
+    )
+
+
+# -----------------------------
+# Export Invoice PDF
+# -----------------------------
+@router.get("/{sale_id}/invoice/pdf")
+def export_invoice_pdf_api(
+
+    sale_id: int,
+
+    current_user=Depends(get_current_user),
+
+    db: Session = Depends(get_db)
+
+):
+
+    return export_invoice_pdf(
+
+        db,
+
+        current_user.company_id,
+
+        sale_id
 
     )

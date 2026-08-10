@@ -100,3 +100,65 @@ export const sortSales = async (sort_by: string) => {
 
   return response.data;
 };
+
+// -------------------------
+// Export Invoice PDF
+// -------------------------
+export const exportInvoicePDF = async (saleId: number) => {
+  const response = await API.get(
+    `/sales/${saleId}/invoice/pdf`,
+    {
+      responseType: "blob",
+    }
+  );
+
+  const url = window.URL.createObjectURL(
+    new Blob([response.data])
+  );
+
+  const link = document.createElement("a");
+
+  link.href = url;
+
+  link.setAttribute(
+    "download",
+    `Invoice_${saleId}.pdf`
+  );
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  link.remove();
+};
+
+// -------------------------
+// Export Invoice CSV
+// -------------------------
+export const exportInvoiceCSV = async (saleId: number) => {
+  const response = await API.get(
+    `/sales/${saleId}/invoice/csv`,
+    {
+      responseType: "blob",
+    }
+  );
+
+  const url = window.URL.createObjectURL(
+    new Blob([response.data])
+  );
+
+  const link = document.createElement("a");
+
+  link.href = url;
+
+  link.setAttribute(
+    "download",
+    `Invoice_${saleId}.csv`
+  );
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  link.remove();
+};

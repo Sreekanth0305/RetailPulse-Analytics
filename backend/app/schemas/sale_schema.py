@@ -25,6 +25,10 @@ class SaleCreate(BaseModel):
 
     payment_method: str
 
+    payment_status: str = "Paid"
+
+    notes: str | None = None
+
     items: list[SaleItemCreate]
 
 
@@ -38,6 +42,10 @@ class SaleUpdate(BaseModel):
     sales_channel: str
 
     payment_method: str
+
+    payment_status: str = "Paid"
+
+    notes: str | None = None
 
     items: list[SaleItemCreate]
 
@@ -61,7 +69,17 @@ class SaleResponse(BaseModel):
 
     payment_method: str
 
+    subtotal: float
+
+    discount: float
+
+    tax: float
+
     total_amount: float
+
+    payment_status: str
+
+    notes: str | None = None
 
     created_by: int
 
@@ -91,6 +109,8 @@ class SaleListResponse(BaseModel):
     sales_channel: str
 
     payment_method: str
+
+    payment_status: str
 
     total_amount: float
 
@@ -139,6 +159,19 @@ class SaleDetailResponse(BaseModel):
 
     payment_method: str
 
+    subtotal: float
+
+    discount: float
+
+    tax: float
+
     total_amount: float
 
+    payment_status: str
+
+    notes: str | None = None
+
     items: list[SaleItemResponse]
+
+    class Config:
+        from_attributes = True

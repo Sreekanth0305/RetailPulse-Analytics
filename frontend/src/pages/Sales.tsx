@@ -9,6 +9,8 @@ import {
   filterSales,
   sortSales,
   deleteSale,
+  exportInvoicePDF,
+  exportInvoiceCSV,
 } from "../services/saleService";
 
 import SaleForm from "../components/SaleForm";
@@ -110,6 +112,40 @@ const Sales = () => {
       loadSales();
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  // const handlePreviewInvoice = async (saleId: number) => {
+  //   try {
+  //     const invoice = await previewInvoice(saleId);
+  
+  //     console.log(invoice);
+  
+  //     navigate(`/sales/${saleId}/invoice`, {
+  //       state: invoice,
+  //     });
+  
+  //   } catch (err) {
+  //     console.log(err);
+  //     alert("Unable to preview invoice.");
+  //   }
+  // };
+  
+  const handleExportPDF = async (saleId: number) => {
+    try {
+      await exportInvoicePDF(saleId);
+    } catch (err) {
+      console.log(err);
+      alert("Unable to export PDF.");
+    }
+  };
+  
+  const handleExportCSV = async (saleId: number) => {
+    try {
+      await exportInvoiceCSV(saleId);
+    } catch (err) {
+      console.log(err);
+      alert("Unable to export CSV.");
     }
   };
 
@@ -363,6 +399,24 @@ const Sales = () => {
                   Delete
                 </button>
 
+                <button
+                  onClick={() => navigate(`/sales/${sale.id}`)}
+                >
+                  Invoice
+                </button>
+              
+                <button
+                  onClick={() => handleExportPDF(sale.id)}
+                >
+                  PDF
+                </button>
+              
+                <button
+                  onClick={() => handleExportCSV(sale.id)}
+                >
+                  CSV
+                </button>
+                
               </td>
 
             </tr>
