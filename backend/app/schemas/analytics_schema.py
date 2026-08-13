@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from datetime import datetime
-from pydantic import BaseModel
 
 
 class AnalyticsKPIResponse(BaseModel):
@@ -12,6 +11,10 @@ class AnalyticsKPIResponse(BaseModel):
     total_products_sold: int
 
     average_order_value: float
+
+    total_discount: float
+
+    total_tax: float
 
     total_inventory_value: float
 
@@ -29,11 +32,13 @@ class SalesTrendResponse(BaseModel):
 
     period: str
     orders: int
+    revenue: float
 
 class TopSellingProductResponse(BaseModel):
 
     product_name: str
     quantity_sold: int
+    revenue: float
 
 class TopCategoryResponse(BaseModel):
 
@@ -44,6 +49,7 @@ class PaymentMethodResponse(BaseModel):
 
     payment_method: str
     total_sales: int
+    revenue: float
 
 class SalesChannelResponse(BaseModel):
 
@@ -124,3 +130,9 @@ class DrilldownSaleResponse(BaseModel):
     class Config:
 
         from_attributes = True
+
+class TopCustomerResponse(BaseModel):
+    customer_name: str
+    total_orders: int
+    total_spend: float
+    average_order_value: float

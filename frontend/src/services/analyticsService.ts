@@ -310,3 +310,24 @@ export const getSeasonalSalesPattern = () => {
     });
 
 };
+
+// =========================================
+// Top Customers / Customer Revenue Analysis
+// =========================================
+export const getTopCustomers = (params: any = {}) => {
+
+    const token = localStorage.getItem("access_token");
+
+    return axios.get("/analytics/top-customers", {
+
+        params,
+
+        headers: {
+
+            Authorization: `Bearer ${token}`,
+
+        },
+
+    });
+
+};

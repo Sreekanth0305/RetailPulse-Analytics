@@ -10,6 +10,7 @@ from app.schemas.analytics_schema import (
     SalesTrendResponse,
     TopSellingProductResponse,
     TopCategoryResponse,
+    TopCustomerResponse,
     PaymentMethodResponse,
     SalesChannelResponse,
     InventoryDistributionResponse,
@@ -28,6 +29,7 @@ from app.services.analytics_service import (
     get_sales_trend,
     get_top_selling_products,
     get_top_categories,
+    get_top_customers,
     get_sales_by_payment_method,
     get_sales_by_sales_channel,
     get_inventory_distribution,
@@ -74,6 +76,8 @@ def analytics_kpis_api(
 
     payment_method: str | None = None,
 
+    customer_name: str | None = None,
+
     current_user=Depends(get_current_user),
 
     db: Session = Depends(get_db)
@@ -98,7 +102,9 @@ def analytics_kpis_api(
 
         sales_channel=sales_channel,
 
-        payment_method=payment_method
+        payment_method=payment_method,
+
+        customer_name=customer_name
 
     )
 
@@ -128,6 +134,8 @@ def revenue_trend_api(
 
     payment_method: str | None = None,
 
+    customer_name: str | None = None,
+
     current_user=Depends(get_current_user),
 
     db: Session = Depends(get_db)
@@ -154,7 +162,9 @@ def revenue_trend_api(
 
         sales_channel=sales_channel,
 
-        payment_method=payment_method
+        payment_method=payment_method,
+
+        customer_name=customer_name
 
     )
 
@@ -183,6 +193,8 @@ def sales_trend_api(
 
     payment_method: str | None = None,
 
+    customer_name: str | None = None,
+
     current_user=Depends(get_current_user),
 
     db: Session = Depends(get_db)
@@ -209,7 +221,9 @@ def sales_trend_api(
 
         sales_channel=sales_channel,
 
-        payment_method=payment_method
+        payment_method=payment_method,
+
+        customer_name=customer_name
 
     )
 
@@ -236,6 +250,10 @@ def top_selling_products_api(
 
     payment_method: str | None = None,
 
+    sort_by: str = "quantity",
+
+    customer_name: str | None = None,
+
     current_user=Depends(get_current_user),
 
     db: Session = Depends(get_db)
@@ -260,7 +278,66 @@ def top_selling_products_api(
 
         sales_channel=sales_channel,
 
-        payment_method=payment_method
+        payment_method=payment_method,
+
+        sort_by=sort_by,
+
+        customer_name=customer_name
+
+    )
+
+# -----------------------------
+# Top Customers by Revenue
+# -----------------------------
+@router.get(
+    "/top-customers",
+    response_model=list[TopCustomerResponse]
+)
+def top_customers_api(
+
+    start_date: str | None = None,
+
+    end_date: str | None = None,
+
+    category_id: int | None = None,
+
+    product_id: int | None = None,
+
+    brand: str | None = None,
+
+    sales_channel: str | None = None,
+
+    payment_method: str | None = None,
+
+    customer_name: str | None = None,
+
+    current_user=Depends(get_current_user),
+
+    db: Session = Depends(get_db)
+
+):
+
+    return get_top_customers(
+
+        db=db,
+
+        company_id=current_user.company_id,
+
+        start_date=start_date,
+
+        end_date=end_date,
+
+        category_id=category_id,
+
+        product_id=product_id,
+
+        brand=brand,
+
+        sales_channel=sales_channel,
+
+        payment_method=payment_method,
+
+        customer_name=customer_name
 
     )
 
@@ -338,6 +415,8 @@ def sales_by_payment_method_api(
 
     payment_method: str | None = None,
 
+    customer_name: str | None = None,
+
     current_user=Depends(get_current_user),
 
     db: Session = Depends(get_db)
@@ -362,7 +441,9 @@ def sales_by_payment_method_api(
 
         sales_channel=sales_channel,
 
-        payment_method=payment_method
+        payment_method=payment_method,
+
+        customer_name=customer_name
 
     )
 

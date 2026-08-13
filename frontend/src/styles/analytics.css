@@ -255,3 +255,20 @@ font-weight:600;
 .refresh-btn:hover {
     background: #125ca1;
 }
+
+.analytics-loading {
+    padding: 12px 16px;
+    margin-bottom: 15px;
+    background: #e3f2fd;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.analytics-error {
+    padding: 12px 16px;
+    margin-bottom: 15px;
+    background: #ffebee;
+    color: #c62828;
+    border-radius: 6px;
+    text-align: center;
+}

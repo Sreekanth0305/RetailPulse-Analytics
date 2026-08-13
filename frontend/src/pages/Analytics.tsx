@@ -24,7 +24,8 @@ import {
     getProductDemandTrend,
     getCategoryDemandTrend,
     getTopPredictedProducts,
-    getSeasonalSalesPattern
+    getSeasonalSalesPattern,
+    getTopCustomers
 
 } from "../services/analyticsService";
 
@@ -41,6 +42,8 @@ import {
     ResponsiveContainer,
     LineChart,
     Line,
+    ScatterChart,
+    Scatter,
     XAxis,
     YAxis,
     Tooltip,
@@ -83,6 +86,10 @@ function Analytics() {
         total_products_sold: 0,
     
         average_order_value: 0,
+
+        total_discount: 0,
+
+        total_tax: 0,
     
         total_inventory_value: 0,
     
@@ -101,6 +108,12 @@ function Analytics() {
     const [salesTrend, setSalesTrend] = useState<any[]>([]);
 
     const [salesPeriod, setSalesPeriod] = useState("monthly");
+
+    const [salesVsOrdersPeriod, setSalesVsOrdersPeriod] =
+    useState("monthly");
+
+    const [salesVsOrdersData, setSalesVsOrdersData] =
+    useState<any[]>([]);
 
     const [topProducts, setTopProducts] = useState<any[]>([]);
 
@@ -133,6 +146,20 @@ function Analytics() {
     const [refreshing, setRefreshing] = useState(false);
 
     const [customerAnalytics, setCustomerAnalytics] = useState<any>(null);
+
+    const [topCustomers, setTopCustomers] = useState<any[]>([]);
+
+    const [productSort, setProductSort] = useState<
+        "quantity" | "revenue"
+    >("quantity");
+    
+    const [datePreset, setDatePreset] = useState("custom");
+    
+    const [analyticsLoading, setAnalyticsLoading] = useState(false);
+    
+    const [analyticsError, setAnalyticsError] = useState("");
+    
+    const [customerFilter, setCustomerFilter] = useState("");
 
     const [forecastDashboard, setForecastDashboard] = useState<any>(null);
 
@@ -168,6 +195,81 @@ function Analytics() {
 
     };
 
+    const applyDatePreset = (preset: string) => {
+
+        const today = new Date();
+    
+        const formatDate = (date: Date) => {
+            return date.toISOString().split("T")[0];
+        };
+    
+        let start = "";
+        let end = formatDate(today);
+    
+        if (preset === "today") {
+    
+            start = formatDate(today);
+    
+        }
+    
+        else if (preset === "last7") {
+    
+            const date = new Date(today);
+            date.setDate(date.getDate() - 6);
+    
+            start = formatDate(date);
+    
+        }
+    
+        else if (preset === "last30") {
+    
+            const date = new Date(today);
+            date.setDate(date.getDate() - 29);
+    
+            start = formatDate(date);
+    
+        }
+    
+        else if (preset === "thisMonth") {
+    
+            const date = new Date(
+                today.getFullYear(),
+                today.getMonth(),
+                1
+            );
+    
+            start = formatDate(date);
+    
+        }
+    
+        else if (preset === "lastMonth") {
+    
+            const startDate = new Date(
+                today.getFullYear(),
+                today.getMonth() - 1,
+                1
+            );
+    
+            const endDate = new Date(
+                today.getFullYear(),
+                today.getMonth(),
+                0
+            );
+    
+            start = formatDate(startDate);
+            end = formatDate(endDate);
+    
+        }
+    
+        setDatePreset(preset);
+    
+        setFilters(prev => ({
+            ...prev,
+            start_date: start,
+            end_date: end
+        }));
+    };
+
     const loadKPIs = async () => {
 
         try {
@@ -187,6 +289,10 @@ function Analytics() {
                 }
     
             });
+
+            if (customerFilter !== "") {
+                params.customer_name = customerFilter;
+            }
     
             const response = await getAnalyticsKPIs(params);
     
@@ -209,6 +315,46 @@ function Analytics() {
             const response = await getCustomerAnalytics();
     
             setCustomerAnalytics(response.data);
+    
+        }
+    
+        catch (error) {
+    
+            console.log(error);
+    
+        }
+    
+    };
+
+    const loadTopCustomers = async () => {
+
+        try {
+    
+            const params: any = {};
+    
+            Object.entries(filters).forEach(([key, value]) => {
+    
+                if (
+                    value !== "" &&
+                    value !== null &&
+                    value !== undefined
+                ) {
+    
+                    params[key] = value;
+    
+                }
+    
+            });
+    
+            if (customerFilter !== "") {
+    
+                params.customer_name = customerFilter;
+    
+            }
+    
+            const response = await getTopCustomers(params);
+    
+            setTopCustomers(response.data);
     
         }
     
@@ -301,6 +447,10 @@ function Analytics() {
                 }
     
             });
+
+            if (customerFilter !== "") {
+                params.customer_name = customerFilter;
+            }
     
             const response = await getRevenueTrend(params);
     
@@ -343,6 +493,10 @@ function Analytics() {
                 }
     
             });
+
+            if (customerFilter !== "") {
+                params.customer_name = customerFilter;
+            }
     
             const response = await getSalesTrend(params);
     
@@ -377,6 +531,12 @@ function Analytics() {
                 }
     
             });
+
+            params.sort_by = productSort;
+
+            if (customerFilter !== "") {
+                params.customer_name = customerFilter;
+            }
     
             const response = await getTopSellingProducts(params);
     
@@ -429,6 +589,10 @@ function Analytics() {
                     params[key]=value;
                 }
             });
+
+            if (customerFilter !== "") {
+                params.customer_name = customerFilter;
+            }
             
             const response = await getPaymentMethodAnalytics(params);
             setPaymentMethods(response.data);
@@ -601,53 +765,50 @@ function Analytics() {
     const refreshDashboard = async () => {
 
         setRefreshing(true);
-
-        await Promise.all([
-
-            loadKPIs(),
-        
-            loadRevenueTrend(),
-        
-            loadSalesTrend(),
-        
-            loadTopProducts(),
-        
-            loadTopCategories(),
-        
-            loadPaymentMethods(),
-        
-            loadSalesChannels(),
-        
-            loadInventoryDistribution(),
-        
-            loadInventoryValue(),
-        
-            loadStockStatus(),
-        
-            loadLowStockProducts(),
-        
-            loadOutOfStockProducts(),
-
-            loadForecastDashboard(),
-
-            loadHistoricalForecast(),
-
-            loadProductTrend(),
-            
-            loadCategoryTrend(),
-            
-            loadTopForecastProducts(),
-            
-            loadSeasonalPattern()
-        
-        ]);
+        setAnalyticsLoading(true);
+        setAnalyticsError("");
     
-        setTimeout(() => {
+        try {
+    
+            await Promise.all([
+                loadKPIs(),
+                loadRevenueTrend(),
+                loadSalesTrend(),
+                loadTopProducts(),
+                loadTopCategories(),
+                loadPaymentMethods(),
+                loadSalesChannels(),
+                loadInventoryDistribution(),
+                loadInventoryValue(),
+                loadStockStatus(),
+                loadLowStockProducts(),
+                loadOutOfStockProducts(),
+                loadCustomerAnalytics(),
+                loadTopCustomers(),
+                loadForecastDashboard(),
+                loadHistoricalForecast(),
+                loadProductTrend(),
+                loadCategoryTrend(),
+                loadTopForecastProducts(),
+                loadSeasonalPattern(),
+                loadCategories()
+            ]);
+    
+        } catch (error) {
+    
+            console.error(error);
+    
+            setAnalyticsError(
+                "Unable to load analytics data."
+            );
+    
+        } finally {
     
             setRefreshing(false);
+            setAnalyticsLoading(false);
     
-        }, 500);
-
+        }
+    
     };
 
     const exportCSV = () => {
@@ -832,6 +993,27 @@ function Analytics() {
         }
     
     };
+
+    const loadSalesVsOrders = async () => {
+
+        try {
+
+            const response = await getSalesTrend({
+                period: salesVsOrdersPeriod
+            });
+
+            setSalesVsOrdersData(response.data);
+
+        } catch (error) {
+
+            console.error(
+                "Failed to load Sales vs Orders data:",
+                error
+            );
+
+        }
+
+    };
     
     const loadProducts = async (categoryId:number) => {
     
@@ -881,15 +1063,14 @@ function Analytics() {
 
     useEffect(() => {
 
-       loadKPIs();
-
-
-       createAuditLog({
-        action: "Dashboard Viewed",
-        module: "Analytics",
-        browser: getBrowser()
-    }); 
-
+        refreshDashboard();
+    
+        createAuditLog({
+            action: "Dashboard Viewed",
+            module: "Analytics",
+            browser: getBrowser()
+        });
+    
     }, []);
 
     useEffect(() => {
@@ -908,29 +1089,19 @@ function Analytics() {
 
         loadTopProducts();
     
-        loadTopCategories();
-    
-        loadPaymentMethods();
-    
-        loadSalesChannels();
-    
-        loadInventoryDistribution();
-    
-        loadInventoryValue();
-    
-        loadStockStatus();
-    
-        loadLowStockProducts();
-    
-        loadOutOfStockProducts();
+    }, [productSort]);
+
+    useEffect(() => {
 
         loadCategories();
-
-        loadCustomerAnalytics();
-
-        loadForecastDashboard();
     
     }, []);
+
+    useEffect(() => {
+
+        loadSalesVsOrders();
+    
+    }, [salesVsOrdersPeriod]);
 
     useEffect(() => {
 
@@ -953,6 +1124,19 @@ function Analytics() {
             <Navbar />
 
             <div className="analytics-page">
+
+                {analyticsLoading && (
+                    <div className="analytics-loading">
+                        Loading analytics dashboard...
+                    </div>
+                )}
+            
+                {analyticsError && (
+                    <div className="analytics-error">
+                        {analyticsError}
+                    </div>
+                )}
+
 
                 <h1 className="analytics-title">
 
@@ -977,6 +1161,18 @@ function Analytics() {
 
                 <div className="filter-panel">
 
+                    <select
+                        value={datePreset}
+                        onChange={(e) => applyDatePreset(e.target.value)}
+                    >
+                        <option value="custom">Custom Date</option>
+                        <option value="today">Today</option>
+                        <option value="last7">Last 7 Days</option>
+                        <option value="last30">Last 30 Days</option>
+                        <option value="thisMonth">This Month</option>
+                        <option value="lastMonth">Last Month</option>
+                    </select>
+
                     <input
                         type="date"
                         name="start_date"
@@ -997,6 +1193,13 @@ function Analytics() {
                         placeholder="Brand"
                         value={filters.brand}
                         onChange={handleFilterChange}
+                    />
+
+                    <input
+                        type="text"
+                        placeholder="Customer Name"
+                        value={customerFilter}
+                        onChange={(e) => setCustomerFilter(e.target.value)}
                     />
 
                     <select
@@ -1077,6 +1280,7 @@ function Analytics() {
                             loadStockStatus();
                             loadLowStockProducts();
                             loadOutOfStockProducts();
+                            loadTopCustomers();
 
                             createAuditLog({
                                 action: "Dashboard Filters Applied",
@@ -1112,11 +1316,67 @@ function Analytics() {
                 </div>
 
                 <h2 className="section-title">
-
                     Dashboard KPIs
-                
                 </h2>
                 
+                <div className="cards">
+                
+                    <div className="card">
+                        <h3>Total Revenue</h3>
+                        <h1>
+                            ₹{Number(kpis.total_revenue ?? 0).toLocaleString("en-IN", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            })}
+                        </h1>
+                    </div>
+                
+                    <div className="card">
+                        <h3>Total Orders</h3>
+                        <h1>
+                            {Number(kpis.total_orders ?? 0).toLocaleString("en-IN")}
+                        </h1>
+                    </div>
+                
+                    <div className="card">
+                        <h3>Average Order Value</h3>
+                        <h1>
+                            ₹{Number(kpis.average_order_value ?? 0).toLocaleString("en-IN", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            })}
+                        </h1>
+                    </div>
+                
+                    <div className="card">
+                        <h3>Total Items Sold</h3>
+                        <h1>
+                            {Number(kpis.total_products_sold ?? 0).toLocaleString("en-IN")}
+                        </h1>
+                    </div>
+                
+                    <div className="card">
+                        <h3>Total Discount</h3>
+                        <h1>
+                            ₹{Number(kpis.total_discount ?? 0).toLocaleString("en-IN", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            })}
+                        </h1>
+                    </div>
+                
+                    <div className="card">
+                        <h3>Total Tax</h3>
+                        <h1>
+                            ₹{Number(kpis.total_tax ?? 0).toLocaleString("en-IN", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            })}
+                        </h1>
+                    </div>
+                
+                </div>
+
                 <h2 className="section-title">
                     Forecast Dashboard
                 </h2>
@@ -1273,6 +1533,16 @@ function Analytics() {
                         </h1>
                 
                     </div>
+
+                    <div className="card">
+
+                        <h3>Customer Average Order Value</h3>
+                    
+                        <h1>
+                            ₹{customerAnalytics?.average_order_value ?? 0}
+                        </h1>
+                    
+                    </div>
                 
                     <div className="card">
                 
@@ -1381,54 +1651,91 @@ function Analytics() {
                 <div className="chart-card">
 
                     <h3>
-                
-                        Top Customers
-                
+                        Customer Revenue Analysis
                     </h3>
                 
-                    <table className="analytics-table">
+                    {topCustomers.length === 0 ? (
                 
-                        <thead>
+                        <div className="analytics-empty">
                 
-                            <tr>
+                            No customer revenue data available
+                            for the selected period.
                 
-                                <th>Name</th>
+                        </div>
                 
-                                <th>Orders</th>
+                    ) : (
                 
-                                <th>Revenue</th>
+                        <div className="table-wrapper">
                 
-                            </tr>
+                            <table className="analytics-table">
                 
-                        </thead>
+                                <thead>
                 
-                        <tbody>
+                                    <tr>
                 
-                            {
+                                        <th>Customer Name</th>
                 
-                                customerAnalytics?.top_customers?.map((customer:any)=>(
+                                        <th>Orders</th>
                 
-                                    <tr key={customer.id}>
+                                        <th>Total Spend</th>
                 
-                                        <td>{customer.full_name}</td>
-                
-                                        <td>{customer.total_orders}</td>
-                
-                                        <td>
-                
-                                            ₹{customer.total_revenue}
-                
-                                        </td>
+                                        <th>Average Order Value</th>
                 
                                     </tr>
                 
-                                ))
+                                </thead>
                 
-                            }
+                                <tbody>
                 
-                        </tbody>
+                                    {topCustomers.map(
+                                        (customer: any, index: number) => (
                 
-                    </table>
+                                        <tr
+                                            key={
+                                                customer.customer_name ??
+                                                index
+                                            }
+                                        >
+                
+                                            <td>
+                                                {customer.customer_name}
+                                            </td>
+                
+                                            <td>
+                                                {customer.total_orders}
+                                            </td>
+                
+                                            <td>
+                                                ₹
+                                                {Number(
+                                                    customer.total_spend ?? 0
+                                                ).toLocaleString("en-IN", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                })}
+                                            </td>
+                
+                                            <td>
+                                                ₹
+                                                {Number(
+                                                    customer.average_order_value ?? 0
+                                                ).toLocaleString("en-IN", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                })}
+                                            </td>
+                
+                                        </tr>
+                
+                                    ))}
+                
+                                </tbody>
+                
+                            </table>
+                
+                        </div>
+                
+                    )}
                 
                 </div>
 
@@ -1600,6 +1907,143 @@ function Analytics() {
                 
                 </div>
 
+                <div className="analytics-section">
+
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "15px"
+            }}
+        >
+
+                <h2>
+                    Sales vs Orders
+                </h2>
+        
+                <select
+                    value={salesVsOrdersPeriod}
+                    onChange={(e) =>
+                        setSalesVsOrdersPeriod(e.target.value)
+                    }
+                    style={{
+                        padding: "8px 12px",
+                        borderRadius: "6px",
+                        border: "1px solid #ccc",
+                        background: "#fff",
+                        cursor: "pointer"
+                    }}
+                >
+        
+                    <option value="daily">
+                        Daily
+                    </option>
+        
+                    <option value="weekly">
+                        Weekly
+                    </option>
+        
+                    <option value="monthly">
+                        Monthly
+                    </option>
+        
+                </select>
+        
+            </div>
+        
+        
+            <div
+                style={{
+                    width: "100%",
+                    height: "420px",
+                    background: "#fff",
+                    borderRadius: "12px",
+                    padding: "20px",
+                    boxSizing: "border-box"
+                }}
+            >
+        
+                <ResponsiveContainer
+                    width="100%"
+                    height="100%"
+                >
+        
+                    <ScatterChart
+                        margin={{
+                            top: 20,
+                            right: 30,
+                            bottom: 30,
+                            left: 30
+                        }}
+                    >
+        
+                        <CartesianGrid
+                            strokeDasharray="3 3"
+                        />
+        
+                        {/* ONE X-AXIS */}
+                        <XAxis
+                            type="number"
+                            dataKey="orders"
+                            name="Number of Orders"
+                            label={{
+                                value: "Number of Orders",
+                                position: "insideBottom",
+                                offset: -15
+                            }}
+                        />
+        
+                        {/* ONE Y-AXIS */}
+                        <YAxis
+                            type="number"
+                            dataKey="revenue"
+                            name="Revenue"
+                            label={{
+                                value: "Revenue",
+                                angle: -90,
+                                position: "insideLeft"
+                            }}
+                        />
+        
+                        <Tooltip
+                            cursor={{
+                                strokeDasharray: "3 3"
+                            }}
+                            formatter={(value: any, name: any) => {
+        
+                                if (name === "Revenue") {
+        
+                                    return [
+                                        Number(value).toLocaleString(),
+                                        "Revenue"
+                                    ];
+        
+                                }
+        
+                                return [
+                                    value,
+                                    "Number of Orders"
+                                ];
+        
+                            }}
+                        />
+        
+                        <Scatter
+                            name="Sales vs Orders"
+                            data={salesVsOrdersData}
+                            fill="#1976d2"
+                        />
+        
+                    </ScatterChart>
+        
+                </ResponsiveContainer>
+        
+            </div>
+        
+        </div>
+
+
                 <h2 className="section-title">
                     Sales Analytics
                 </h2>
@@ -1609,6 +2053,18 @@ function Analytics() {
                     <div className="chart-card">
                 
                         <h3>Top 10 Best Selling Products</h3>
+
+                        <select
+                            value={productSort}
+                            onChange={(e) =>
+                                setProductSort(
+                                    e.target.value as "quantity" | "revenue"
+                                )
+                            }
+                        >
+                            <option value="quantity">Sort by Quantity</option>
+                            <option value="revenue">Sort by Revenue</option>
+                        </select>
                 
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={topProducts}>
@@ -1628,6 +2084,36 @@ function Analytics() {
                             
                             </BarChart>
                         </ResponsiveContainer>
+
+                        <table className="analytics-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity Sold</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                        
+                            <tbody>
+                                {topProducts.length > 0 ? (
+                                    topProducts.map((item: any) => (
+                                        <tr key={item.product_id ?? item.product_name}>
+                                            <td>{item.product_name}</td>
+                                            <td>{item.quantity_sold}</td>
+                                            <td>₹{Number(item.revenue ?? 0).toLocaleString()}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={3}>
+                                            No product data available
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        
+                        </table>
                 
                     </div>
                 
@@ -1716,6 +2202,36 @@ function Analytics() {
                             
                             </PieChart>
                         </ResponsiveContainer>
+
+                        <table className="analytics-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Payment Method</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                        
+                            <tbody>
+                                {paymentMethods.length > 0 ? (
+                                    paymentMethods.map((item: any) => (
+                                        <tr key={item.payment_method}>
+                                            <td>{item.payment_method}</td>
+                                            <td>
+                                                {Number(item.total_sales ?? 0).toLocaleString()}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={2}>
+                                            No payment method data available
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        
+                        </table>
                 
                     </div>
                 

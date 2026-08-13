@@ -33,7 +33,10 @@ def get_dashboard_kpis(
 
     sales_channel: str | None = None,
 
-    payment_method: str | None = None
+    payment_method: str | None = None,
+
+    customer_name: str | None = None
+
 
 ):
     
@@ -60,6 +63,11 @@ def get_dashboard_kpis(
     if payment_method:
         sales_query = sales_query.filter(
             Sale.payment_method == payment_method
+        )
+
+    if customer_name:
+        sales_query = sales_query.filter(
+            Sale.customer_name == customer_name
         )
 
     if (
@@ -185,6 +193,11 @@ def get_dashboard_kpis(
         items_query = items_query.filter(
             Sale.payment_method == payment_method
         )
+
+    if customer_name:
+        items_query = items_query.filter(
+            Sale.customer_name == customer_name
+        )
     
     if category_id:
         items_query = items_query.filter(
@@ -210,6 +223,27 @@ def get_dashboard_kpis(
         )
         .scalar()
     )
+    
+    total_discount = (
+        items_query.with_entities(
+            func.coalesce(
+                func.sum(SaleItem.discount),
+                0
+            )
+        )
+        .scalar()
+    )
+    
+    total_tax = (
+        items_query.with_entities(
+            func.coalesce(
+                func.sum(SaleItem.tax),
+                0
+            )
+        )
+        .scalar()
+    )
+
     # -----------------------------------
     # Average Order Value
     # -----------------------------------
@@ -285,29 +319,40 @@ def get_dashboard_kpis(
     total_categories = category_query.count()
 
     return {
-
-        "total_revenue": total_revenue,
-
-        "total_orders": total_orders,
-
-        "total_products_sold": total_products_sold,
-
+        "total_revenue": float(total_revenue or 0),
+        "total_orders": int(total_orders or 0),
+        "total_products_sold": int(total_products_sold or 0),
+    
         "average_order_value": round(
-
-            average_order_value,
-
+            float(average_order_value or 0),
             2
-
         ),
-
-        "total_inventory_value": inventory_value,
-
-        "low_stock_products": low_stock_products,
-
-        "out_of_stock_products": out_of_stock_products,
-
-        "total_categories": total_categories
-
+    
+        "total_discount": round(
+            float(total_discount or 0),
+            2
+        ),
+    
+        "total_tax": round(
+            float(total_tax or 0),
+            2
+        ),
+    
+        "total_inventory_value": float(
+            inventory_value or 0
+        ),
+    
+        "low_stock_products": int(
+            low_stock_products or 0
+        ),
+    
+        "out_of_stock_products": int(
+            out_of_stock_products or 0
+        ),
+    
+        "total_categories": int(
+            total_categories or 0
+        )
     }
 
 # -------------------------------------------------
@@ -324,7 +369,8 @@ def get_revenue_trend(
     product_id: int | None = None,
     brand: str | None = None,
     sales_channel: str | None = None,
-    payment_method: str | None = None
+    payment_method: str | None = None,
+    customer_name: str | None = None
 ):
 
     query = (
@@ -352,6 +398,11 @@ def get_revenue_trend(
     if payment_method:
         query = query.filter(
             Sale.payment_method == payment_method
+        )
+
+    if customer_name:
+        query = query.filter(
+            Sale.customer_name == customer_name
         )
     
     if category_id or product_id or brand:
@@ -534,7 +585,10 @@ def get_sales_trend(
 
     sales_channel: str | None = None,
 
-    payment_method: str | None = None
+    payment_method: str | None = None,
+
+    customer_name: str | None = None
+
 
 ):
     query = (
@@ -581,6 +635,11 @@ def get_sales_trend(
     
             Sale.payment_method == payment_method
     
+        )
+
+    if customer_name:
+        query = query.filter(
+            Sale.customer_name == customer_name
         )
     
     if category_id or product_id or brand:
@@ -645,7 +704,8 @@ def get_sales_trend(
                     String
                 ).label("period"),
     
-                func.count(Sale.id).label("orders")
+                func.count(Sale.id).label("orders"),
+                func.sum(Sale.total_amount).label("revenue")
     
             )
     
@@ -676,7 +736,8 @@ def get_sales_trend(
                     "%x-W%v"
                 ).label("period"),
     
-                func.count(Sale.id).label("orders")
+                func.count(Sale.id).label("orders"),
+                func.sum(Sale.total_amount).label("revenue")
     
             )
     
@@ -716,7 +777,8 @@ def get_sales_trend(
     
                 ).label("period"),
     
-                func.count(Sale.id).label("orders")
+                func.count(Sale.id).label("orders"),
+                func.sum(Sale.total_amount).label("revenue")
     
             )
     
@@ -756,7 +818,9 @@ def get_sales_trend(
     
             "period": str(row.period),
     
-            "orders": int(row.orders)
+            "orders": int(row.orders or 0),
+
+            "revenue": float(row.revenue or 0)
     
         }
     
@@ -785,7 +849,11 @@ def get_top_selling_products(
 
     sales_channel: str | None = None,
 
-    payment_method: str | None = None
+    payment_method: str | None = None,
+
+    sort_by: str = "quantity",
+
+    customer_name: str | None = None
 
 ):
 
@@ -797,7 +865,11 @@ def get_top_selling_products(
     
             func.sum(
                 SaleItem.quantity
-            ).label("quantity_sold")
+            ).label("quantity_sold"),
+
+            func.sum(
+                SaleItem.total
+            ).label("revenue")
     
         )
     
@@ -848,6 +920,12 @@ def get_top_selling_products(
         query = query.filter(
             Sale.payment_method == payment_method
         )
+
+    if customer_name:
+
+        query = query.filter(
+            Sale.customer_name == customer_name
+        )
     
     if category_id:
     
@@ -867,6 +945,14 @@ def get_top_selling_products(
             Product.brand == brand
         )
 
+    if sort_by == "revenue":
+        order_column = desc("revenue")
+
+    else:
+
+        order_column = desc("quantity_sold")
+
+
     products = (
 
         query
@@ -881,7 +967,7 @@ def get_top_selling_products(
     
         .order_by(
     
-            desc("quantity_sold")
+            order_column
     
         )
     
@@ -892,16 +978,253 @@ def get_top_selling_products(
     )
 
     return [
-
         {
 
             "product_name": row.product_name,
 
-            "quantity_sold": row.quantity_sold
+            "quantity_sold": int(
+                row.quantity_sold or 0
+            ),
+
+            "revenue": float(
+                row.revenue or 0
+            )
 
         }
 
         for row in products
+
+    ]
+
+# -----------------------------
+# Top Customers by Revenue
+# -----------------------------
+def get_top_customers(
+
+    db: Session,
+
+    company_id: int,
+
+    start_date: str | None = None,
+
+    end_date: str | None = None,
+
+    category_id: int | None = None,
+
+    product_id: int | None = None,
+
+    brand: str | None = None,
+
+    sales_channel: str | None = None,
+
+    payment_method: str | None = None,
+
+    customer_name: str | None = None
+
+):
+
+    # -----------------------------------
+    # First find the sales that match
+    # product/category/brand filters.
+    # -----------------------------------
+
+    filtered_sale_ids = None
+
+    if category_id or product_id or brand:
+
+        filtered_sale_query = (
+
+            db.query(
+                Sale.id
+            )
+
+            .join(
+                SaleItem,
+                Sale.id == SaleItem.sale_id
+            )
+
+            .join(
+                Product,
+                Product.id == SaleItem.product_id
+            )
+
+            .filter(
+                Sale.company_id == company_id
+            )
+
+        )
+
+        if category_id:
+
+            filtered_sale_query = filtered_sale_query.filter(
+                SaleItem.category_id == category_id
+            )
+
+        if product_id:
+
+            filtered_sale_query = filtered_sale_query.filter(
+                SaleItem.product_id == product_id
+            )
+
+        if brand:
+
+            filtered_sale_query = filtered_sale_query.filter(
+                Product.brand == brand
+            )
+
+        filtered_sale_ids = (
+            filtered_sale_query
+            .distinct()
+            .subquery()
+        )
+
+    # -----------------------------------
+    # Customer aggregation
+    # -----------------------------------
+
+    query = (
+
+        db.query(
+
+            Sale.customer_name.label(
+                "customer_name"
+            ),
+
+            func.count(
+                Sale.id
+            ).label(
+                "total_orders"
+            ),
+
+            func.coalesce(
+                func.sum(
+                    Sale.total_amount
+                ),
+                0
+            ).label(
+                "total_spend"
+            )
+
+        )
+
+        .filter(
+
+            Sale.company_id == company_id
+
+        )
+
+    )
+
+    # -----------------------------------
+    # Apply filtered sale IDs
+    # -----------------------------------
+
+    if filtered_sale_ids is not None:
+
+        query = query.join(
+            filtered_sale_ids,
+            Sale.id == filtered_sale_ids.c.id
+        )
+
+    # -----------------------------------
+    # Date filters
+    # -----------------------------------
+
+    if start_date:
+
+        query = query.filter(
+            func.date(Sale.sale_date) >= start_date
+        )
+
+    if end_date:
+
+        query = query.filter(
+            func.date(Sale.sale_date) <= end_date
+        )
+
+    # -----------------------------------
+    # Sales channel
+    # -----------------------------------
+
+    if sales_channel:
+
+        query = query.filter(
+            Sale.sales_channel == sales_channel
+        )
+
+    # -----------------------------------
+    # Payment method
+    # -----------------------------------
+
+    if payment_method:
+
+        query = query.filter(
+            Sale.payment_method == payment_method
+        )
+
+    # -----------------------------------
+    # Customer filter
+    # -----------------------------------
+
+    if customer_name:
+
+        query = query.filter(
+            Sale.customer_name == customer_name
+        )
+
+    # -----------------------------------
+    # Group by customer
+    # -----------------------------------
+
+    customers = (
+
+        query
+
+        .group_by(
+            Sale.customer_name
+        )
+
+        .order_by(
+            desc("total_spend")
+        )
+
+        .limit(10)
+
+        .all()
+
+    )
+
+    # -----------------------------------
+    # Response
+    # -----------------------------------
+
+    return [
+
+        {
+
+            "customer_name": row.customer_name,
+
+            "total_orders": int(
+                row.total_orders or 0
+            ),
+
+            "total_spend": round(
+                float(row.total_spend or 0),
+                2
+            ),
+
+            "average_order_value": round(
+
+                float(row.total_spend or 0)
+                / int(row.total_orders or 1),
+
+                2
+
+            )
+
+        }
+
+        for row in customers
 
     ]
 
@@ -1073,7 +1396,9 @@ def get_sales_by_payment_method(
 
     sales_channel: str | None = None,
 
-    payment_method: str | None = None
+    payment_method: str | None = None,
+
+    customer_name: str | None = None
 
 ):
 
@@ -1085,7 +1410,12 @@ def get_sales_by_payment_method(
     
             func.count(
                 Sale.id
-            ).label("total_sales")
+            ).label("total_sales"),
+
+            func.coalesce(
+                func.sum(Sale.total_amount),
+                0
+            ).label("revenue")
     
         )
     
@@ -1119,6 +1449,11 @@ def get_sales_by_payment_method(
     
         query = query.filter(
             Sale.payment_method == payment_method
+        )
+
+    if customer_name:
+        query = query.filter(
+            Sale.customer_name == customer_name
         )
     
     if category_id or product_id or brand:
@@ -1161,23 +1496,23 @@ def get_sales_by_payment_method(
 
     payment_methods = (
 
-    query
-
-    .group_by(
-
-        Sale.payment_method
-
+        query
+    
+        .group_by(
+    
+            Sale.payment_method
+    
+        )
+    
+        .order_by(
+    
+            func.count(Sale.id).desc()
+    
+        )
+    
+        .all()
+    
     )
-
-    .order_by(
-
-        func.count(Sale.id).desc()
-
-    )
-
-    .all()
-
-)
 
     return [
 
@@ -1185,7 +1520,10 @@ def get_sales_by_payment_method(
 
             "payment_method": row.payment_method,
 
-            "total_sales": row.total_sales
+            "total_sales": int(row.total_sales or 0),
+
+            "revenue": float(row.revenue or 0)
+
 
         }
 
