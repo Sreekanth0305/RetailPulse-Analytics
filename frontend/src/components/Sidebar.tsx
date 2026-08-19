@@ -13,7 +13,8 @@ import {
   PointOfSale,
   Warehouse,
   Group,
-  TrendingUp
+  TrendingUp,
+  AllInbox
 } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
@@ -123,6 +124,14 @@ function Sidebar() {
           <TrendingUp />
         
           <span>Demand Forecast</span>
+        
+        </li>
+
+        <li onClick={() => navigate("/inventory/forecast")}>
+
+          <AllInbox />
+        
+          <span>Inventory Forecast</span>
         
         </li>
 

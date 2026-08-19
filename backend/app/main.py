@@ -33,6 +33,7 @@ from app.routes.customer_routes import router as customer_router
 from app.routes.customer_profile_routes import router as customer_profile_router
 from app.routes.customer_timeline_routes import router as customer_timeline_router
 from app.routes.forecast_routes import router as forecast_router
+from app.routes.inventory_forecast_routes import router as inventory_forecast_router
 
 
 Base.metadata.create_all(bind=engine)
@@ -70,6 +71,7 @@ app.include_router(category_router)
 app.include_router(product_router)
 app.include_router(sale_router)
 app.include_router(notification_router)
+app.include_router(inventory_forecast_router)
 app.include_router(inventory_router)
 app.include_router(analytics_router)
 app.include_router(customer_router)
