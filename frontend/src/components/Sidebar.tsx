@@ -14,7 +14,8 @@ import {
   Warehouse,
   Group,
   TrendingUp,
-  AllInbox
+  AllInbox,
+  UploadFile
 } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
@@ -132,6 +133,14 @@ function Sidebar() {
           <AllInbox />
         
           <span>Inventory Forecast</span>
+        
+        </li>
+
+        <li onClick={() => navigate("/data-import")}>
+
+          <UploadFile />
+        
+          <span>Data Import</span>
         
         </li>
 

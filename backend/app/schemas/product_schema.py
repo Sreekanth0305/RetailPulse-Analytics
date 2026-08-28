@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-
+from typing import Optional
 
 # -----------------------------
 # Create Product
@@ -46,8 +46,8 @@ class ProductResponse(BaseModel):
     category_id: int
     name: str
     sku: str
-    brand: str
-    description: str
+    brand: Optional[str] = None
+    description: Optional[str] = None
     unit_price: float
     cost_price: float
     stock_quantity: int
@@ -65,8 +65,8 @@ class ProductListResponse(BaseModel):
 
     name: str
     sku: str
-    brand: str
-    description: str
+    brand: Optional[str] = None
+    description: Optional[str] = None
 
     unit_price: float
     cost_price: float

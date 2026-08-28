@@ -15,6 +15,8 @@ from app.models.inventory_movement import InventoryMovement
 from app.models.customer_purchase_summary import CustomerPurchaseSummary
 from app.models.demand_forecast import DemandForecast
 from app.models.forecast_history import ForecastHistory
+from app.models.import_history import ImportHistory
+from app.models.import_error import ImportErrorRecord
 
 
 from app.routes.company_routes import router as company_router
@@ -34,6 +36,7 @@ from app.routes.customer_profile_routes import router as customer_profile_router
 from app.routes.customer_timeline_routes import router as customer_timeline_router
 from app.routes.forecast_routes import router as forecast_router
 from app.routes.inventory_forecast_routes import router as inventory_forecast_router
+from app.routes.import_routes import router as import_router
 
 
 Base.metadata.create_all(bind=engine)
@@ -78,3 +81,4 @@ app.include_router(customer_router)
 app.include_router(customer_profile_router)
 app.include_router(customer_timeline_router)
 app.include_router(forecast_router)
+app.include_router(import_router)

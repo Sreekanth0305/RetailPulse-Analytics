@@ -1,0 +1,490 @@
+/* =========================================================
+   DATA IMPORT PAGE
+   Matches the general style used by Customers page
+   ========================================================= */
+
+.data-import-page {
+    margin-left: 260px;
+    padding: 25px;
+    min-height: calc(100vh - 70px);
+    background: #f5f7fb;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   CONTAINER
+   ========================================================= */
+
+.data-import-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.data-import-header {
+    margin-bottom: 20px;
+}
+
+.data-import-title {
+    margin: 0 0 8px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.data-import-subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.import-card {
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    margin-bottom: 24px !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06) !important;
+    border: none !important;
+}
+
+
+/* =========================================================
+   CARD CONTENT
+   ========================================================= */
+
+.import-card .MuiCardContent-root {
+    padding: 24px !important;
+}
+
+
+/* =========================================================
+   CARD TITLE
+   ========================================================= */
+
+.import-card-title {
+    margin: 0 0 18px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+
+/* =========================================================
+   IMPORT CONTROLS
+   ========================================================= */
+
+.import-controls {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   IMPORT TYPE
+   ========================================================= */
+
+.import-type-control {
+    width: 250px;
+}
+
+.import-type-control .MuiOutlinedInput-root {
+    background: #ffffff;
+    border-radius: 6px;
+}
+
+
+/* =========================================================
+   FILE INPUT
+   ========================================================= */
+
+.import-file-input {
+    width: 100%;
+    max-width: 450px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #ffffff;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   SELECTED FILE
+   ========================================================= */
+
+.selected-file {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+    padding: 12px 15px;
+    background: #f3f4f6;
+    border-radius: 8px;
+}
+
+.selected-file-name {
+    color: #374151;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   BUTTONS
+   Matches Customers page button style
+   ========================================================= */
+
+.import-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+
+.data-import-btn {
+    min-height: 40px !important;
+    padding: 9px 18px !important;
+    background: #1976d2 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    box-shadow: none !important;
+}
+
+
+.data-import-btn:hover {
+    background: #135ba1 !important;
+}
+
+
+.data-import-btn:disabled {
+    background: #bdbdbd !important;
+    color: #ffffff !important;
+    cursor: not-allowed !important;
+}
+
+
+/* =========================================================
+   ALERTS
+   ========================================================= */
+
+.import-alert {
+    margin-bottom: 20px !important;
+    border-radius: 8px !important;
+}
+
+
+/* =========================================================
+   IMPORT DETAILS
+   ========================================================= */
+
+.import-details {
+    margin-bottom: 15px;
+}
+
+.import-details p {
+    margin: 6px 0;
+    color: #4b5563;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   TABLE WRAPPER
+   ========================================================= */
+
+.import-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.import-table {
+    width: 100%;
+    min-width: 750px;
+    border-collapse: collapse;
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   Same blue style as Customers page
+   ========================================================= */
+
+.import-table .MuiTableHead-root {
+    background: #1976d2;
+}
+
+
+.import-table .MuiTableHead-root .MuiTableCell-root {
+    background: #1976d2 !important;
+    color: white !important;
+    padding: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   TABLE BODY
+   ========================================================= */
+
+.import-table .MuiTableBody-root .MuiTableCell-root {
+    padding: 12px;
+    border-bottom: 1px solid #ececec;
+    color: #4b5563;
+}
+
+
+/* =========================================================
+   TABLE ROW HOVER
+   ========================================================= */
+
+.import-table .MuiTableBody-root .MuiTableRow-root:hover {
+    background: #f9fafb;
+}
+
+
+/* =========================================================
+   TABLE ACTION BUTTON
+   ========================================================= */
+
+.table-action-btn {
+    margin-right: 5px !important;
+    padding: 6px 12px !important;
+    background: #1976d2 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    box-shadow: none !important;
+}
+
+
+.table-action-btn:hover {
+    background: #135ba1 !important;
+}
+
+
+/* =========================================================
+   VALIDATION SUMMARY
+   ========================================================= */
+
+.validation-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+
+/* =========================================================
+   VALIDATION BOX
+   ========================================================= */
+
+.validation-box {
+    padding: 18px;
+    border-radius: 10px;
+    text-align: center;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+}
+
+
+/* =========================================================
+   VALIDATION LABEL
+   ========================================================= */
+
+.validation-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   VALIDATION NUMBER
+   ========================================================= */
+
+.validation-number {
+    display: block;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   VALIDATION COLORS
+   ========================================================= */
+
+.total-count {
+    color: #2563eb;
+}
+
+.valid-count {
+    color: #16a34a;
+}
+
+.invalid-count {
+    color: #dc2626;
+}
+
+.duplicate-count {
+    color: #d97706;
+}
+
+
+/* =========================================================
+   VALIDATION ERRORS
+   ========================================================= */
+
+.validation-errors {
+    margin-top: 25px;
+}
+
+
+/* =========================================================
+   SECTION SUBTITLE
+   ========================================================= */
+
+.section-subtitle {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+
+/* =========================================================
+   HISTORY HEADER
+   ========================================================= */
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+
+/* =========================================================
+   RESPONSIVE - TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .data-import-page {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+
+    .validation-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+
+    .import-type-control {
+        width: 100%;
+        max-width: 450px;
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE - MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .data-import-page {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+
+    .data-import-title {
+        font-size: 24px;
+    }
+
+
+    .import-card .MuiCardContent-root {
+        padding: 16px !important;
+    }
+
+
+    .import-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+
+    .import-type-control {
+        width: 100%;
+        max-width: none;
+    }
+
+
+    .import-file-input {
+        max-width: none;
+    }
+
+
+    .import-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+
+    .data-import-btn {
+        width: 100%;
+    }
+
+
+    .validation-summary {
+        grid-template-columns: 1fr;
+    }
+
+
+    .history-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+
+    .history-header .data-import-btn {
+        width: 100%;
+    }
+
+
+    .import-table {
+        min-width: 750px;
+    }
+
+}
