@@ -654,6 +654,14 @@ def add_stock(
             detail="Quantity must be greater than zero."
         )
 
+    before_values = {
+        "current_stock": inventory.current_stock,
+        "available_stock": inventory.available_stock,
+        "reserved_stock": inventory.reserved_stock,
+        "reorder_level": inventory.reorder_level,
+        "stock_status": inventory.stock_status
+    }
+
     previous_quantity = inventory.current_stock
 
     inventory.current_stock += data.quantity
@@ -673,6 +681,14 @@ def add_stock(
         inventory.reorder_level
 
     )
+
+    after_values = {
+        "current_stock": inventory.current_stock,
+        "available_stock": inventory.available_stock,
+        "reserved_stock": inventory.reserved_stock,
+        "reorder_level": inventory.reorder_level,
+        "stock_status": inventory.stock_status
+    }
 
     product = (
         db.query(Product)
@@ -721,21 +737,17 @@ def add_stock(
     )
 
     create_audit_log(
-
         db=db,
-
         company_id=company_id,
-
         user_id=user_id,
-
         action="Stock Added",
-
-        entity_name=str(product_id),
-
+        resource_type="Inventory",
+        resource_id=inventory.id,
+        description=f"Stock increased by {data.quantity} units.",
         ip_address=request.client.host,
-
-        browser=request.headers.get("user-agent")
-
+        user_agent=request.headers.get("user-agent"),
+        before_values=before_values,
+        after_values=after_values
     )
 
     return inventory
@@ -791,6 +803,14 @@ def remove_stock(
 
         )
 
+    before_values = {
+        "current_stock": inventory.current_stock,
+        "available_stock": inventory.available_stock,
+        "reserved_stock": inventory.reserved_stock,
+        "reorder_level": inventory.reorder_level,
+        "stock_status": inventory.stock_status
+    }
+
     previous_quantity = inventory.current_stock
 
     inventory.current_stock -= data.quantity
@@ -810,6 +830,14 @@ def remove_stock(
         inventory.reorder_level
 
     )
+
+    after_values = {
+        "current_stock": inventory.current_stock,
+        "available_stock": inventory.available_stock,
+        "reserved_stock": inventory.reserved_stock,
+        "reorder_level": inventory.reorder_level,
+        "stock_status": inventory.stock_status
+    }
 
     product = (
         db.query(Product)
@@ -858,21 +886,17 @@ def remove_stock(
     )
 
     create_audit_log(
-
         db=db,
-
         company_id=company_id,
-
         user_id=user_id,
-
         action="Stock Removed",
-
-        entity_name=str(product_id),
-
+        resource_type="Inventory",
+        resource_id=inventory.id,
+        description=f"Stock decreased by {data.quantity} units.",
         ip_address=request.client.host,
-
-        browser=request.headers.get("user-agent")
-
+        user_agent=request.headers.get("user-agent"),
+        before_values=before_values,
+        after_values=after_values
     )
 
     return inventory
@@ -908,6 +932,15 @@ def adjust_stock(
 
     )
 
+    before_values = {
+        "current_stock": inventory.current_stock,
+        "available_stock": inventory.available_stock,
+        "reserved_stock": inventory.reserved_stock,
+        "reorder_level": inventory.reorder_level,
+        "stock_status": inventory.stock_status
+    }
+
+
     previous_quantity = inventory.current_stock
 
     inventory.current_stock = data.quantity
@@ -927,6 +960,14 @@ def adjust_stock(
         inventory.reorder_level
 
     )
+
+    after_values = {
+        "current_stock": inventory.current_stock,
+        "available_stock": inventory.available_stock,
+        "reserved_stock": inventory.reserved_stock,
+        "reorder_level": inventory.reorder_level,
+        "stock_status": inventory.stock_status
+    }
 
     product = (
         db.query(Product)
@@ -981,21 +1022,17 @@ def adjust_stock(
     )
 
     create_audit_log(
-
         db=db,
-
         company_id=company_id,
-
         user_id=user_id,
-
         action="Stock Adjusted",
-
-        entity_name=str(product_id),
-
+        resource_type="Inventory",
+        resource_id=inventory.id,
+        description=f"Stock manually adjusted to {inventory.current_stock} units.",
         ip_address=request.client.host,
-
-        browser=request.headers.get("user-agent")
-
+        user_agent=request.headers.get("user-agent"),
+        before_values=before_values,
+        after_values=after_values
     )
 
     return inventory
@@ -1041,6 +1078,11 @@ def update_reorder_level(
 
         )
 
+    before_values = {
+        "reorder_level": inventory.reorder_level,
+        "stock_status": inventory.stock_status
+    }
+
     inventory.reorder_level = data.reorder_level
 
     inventory.stock_status = calculate_stock_status(
@@ -1051,25 +1093,26 @@ def update_reorder_level(
 
     )
 
+    after_values = {
+        "reorder_level": inventory.reorder_level,
+        "stock_status": inventory.stock_status
+    }
+
     db.commit()
     db.refresh(inventory)
 
     create_audit_log(
-
         db=db,
-
         company_id=company_id,
-
         user_id=user_id,
-
         action="Reorder Level Updated",
-
-        entity_name=str(product_id),
-
+        resource_type="Inventory",
+        resource_id=inventory.id,
+        description=f"Reorder level updated to {inventory.reorder_level}.",
         ip_address=request.client.host,
-
-        browser=request.headers.get("user-agent")
-
+        user_agent=request.headers.get("user-agent"),
+        before_values=before_values,
+        after_values=after_values
     )
 
     return inventory

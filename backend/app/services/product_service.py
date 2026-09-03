@@ -147,13 +147,15 @@ def create_product(
     db.refresh(inventory)
 
     create_audit_log(
-    db=db,
-    company_id=company_id,
-    user_id=user_id,
-    action="Product Created",
-    entity_name=db_product.name,
-    ip_address=request.client.host,
-    browser=request.headers.get("user-agent")
+        db=db,
+        company_id=company_id,
+        user_id=user_id,
+        action="Product Created",
+        resource_type="Product",
+        resource_id=db_product.id,
+        description=f"Product '{db_product.name}' created.",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent")
     )
 
     return db_product
@@ -274,6 +276,19 @@ def update_product(
         product_id
     )
 
+    before_values = {
+        "category_id": product.category_id,
+        "name": product.name,
+        "sku": product.sku,
+        "brand": product.brand,
+        "description": product.description,
+        "unit_price": product.unit_price,
+        "cost_price": product.cost_price,
+        "stock_quantity": product.stock_quantity,
+        "unit_of_measure": product.unit_of_measure,
+        "status": product.status
+    }
+
     product.category_id = data.category_id
     product.name = data.name
     product.sku = data.sku
@@ -307,17 +322,34 @@ def update_product(
     product.unit_of_measure = data.unit_of_measure
     product.status = data.status
 
+    after_values = {
+        "category_id": product.category_id,
+        "name": product.name,
+        "sku": product.sku,
+        "brand": product.brand,
+        "description": product.description,
+        "unit_price": product.unit_price,
+        "cost_price": product.cost_price,
+        "stock_quantity": product.stock_quantity,
+        "unit_of_measure": product.unit_of_measure,
+        "status": product.status
+    }
+
     db.commit()
     db.refresh(product)
 
     create_audit_log(
-    db=db,
-    company_id=company_id,
-    user_id=user_id,
-    action="Product Updated",
-    entity_name=product.name,
-    ip_address=request.client.host,
-    browser=request.headers.get("user-agent")
+        db=db,
+        company_id=company_id,
+        user_id=user_id,
+        action="Product Updated",
+        resource_type="Product",
+        resource_id=product.id,
+        description=f"Product '{product.name}' updated.",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent"),
+        before_values=before_values,
+        after_values=after_values
     )
 
     return product
@@ -345,21 +377,15 @@ def delete_product(
     db.commit()
 
     create_audit_log(
-
-    db=db,
-
-    company_id=company_id,
-
-    user_id=user_id,
-
-    action="Product Deleted",
-
-    entity_name=product_name,
-
-    ip_address=request.client.host,
-
-    browser=request.headers.get("user-agent")
-
+        db=db,
+        company_id=company_id,
+        user_id=user_id,
+        action="Product Deleted",
+        resource_type="Product",
+        resource_id=product_id,
+        description=f"Product '{product_name}' deleted.",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent")
     )
 
     return {
@@ -389,21 +415,15 @@ def activate_product(
     db.refresh(product)
 
     create_audit_log(
-
-    db=db,
-
-    company_id=company_id,
-
-    user_id=user_id,
-
-    action="Product Activated",
-
-    entity_name=product.name,
-
-    ip_address=request.client.host,
-
-    browser=request.headers.get("user-agent")
-
+        db=db,
+        company_id=company_id,
+        user_id=user_id,
+        action="Product Activated",
+        resource_type="Product",
+        resource_id=product.id,
+        description=f"Product '{product.name}' activated.",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent")
     )
 
     category = (
@@ -456,21 +476,15 @@ def deactivate_product(
     db.refresh(product)
 
     create_audit_log(
-
-    db=db,
-
-    company_id=company_id,
-
-    user_id=user_id,
-
-    action="Product Deactivated",
-
-    entity_name=product.name,
-
-    ip_address=request.client.host,
-
-    browser=request.headers.get("user-agent")    
-
+        db=db,
+        company_id=company_id,
+        user_id=user_id,
+        action="Product Deactivated",
+        resource_type="Product",
+        resource_id=product.id,
+        description=f"Product '{product.name}' deactivated.",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent")
     )
 
     category = (

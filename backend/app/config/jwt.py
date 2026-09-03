@@ -99,3 +99,26 @@ def get_current_user(
         raise credentials_exception
 
     return user
+
+# =========================================================
+# ADMIN AUTHORIZATION
+# =========================================================
+
+def require_admin(
+    current_user=Depends(get_current_user)
+):
+    """
+    Allow only Admin users to access protected
+    administrative functionality.
+    """
+
+    if current_user.role not in [
+        "Super Admin",
+        "Company Admin"
+    ]:
+        raise HTTPException(
+            status_code=403,
+            detail="Admin access required"
+        )
+
+    return current_user

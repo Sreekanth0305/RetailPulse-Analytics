@@ -18,7 +18,6 @@ from app.models.forecast_history import ForecastHistory
 from app.models.import_history import ImportHistory
 from app.models.import_error import ImportErrorRecord
 
-
 from app.routes.company_routes import router as company_router
 from app.routes.auth_routes import router as auth_router
 from app.routes.user_routes import router as user_router

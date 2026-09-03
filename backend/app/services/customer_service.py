@@ -165,27 +165,16 @@ def create_customer(
 
     )
 
-    ip_address = request.client.host
-    
-    browser = request.headers.get("user-agent")
-    
-
     create_audit_log(
-
         db=db,
-
         company_id=company_id,
-
         user_id=user_id,
-
         action="Customer Created",
-
-        entity_name=new_customer.full_name,
-
-        ip_address=ip_address,
-
-        browser=browser
-
+        resource_type="Customer",
+        resource_id=new_customer.id,
+        description=f"Customer '{new_customer.full_name}' created.",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent")
     )
 
     return new_customer
@@ -475,6 +464,22 @@ def update_customer(
 
         )
 
+    before_values = {
+        "full_name": customer.full_name,
+        "email": customer.email,
+        "phone": customer.phone,
+        "date_of_birth": customer.date_of_birth,
+        "gender": customer.gender,
+        "address": customer.address,
+        "city": customer.city,
+        "state": customer.state,
+        "country": customer.country,
+        "customer_type": customer.customer_type,
+        "preferred_sales_channel": customer.preferred_sales_channel,
+        "status": customer.status,
+        "segment": customer.segment
+    }
+
     customer.full_name = customer_data.full_name
 
     customer.email = customer_data.email
@@ -499,6 +504,22 @@ def update_customer(
 
     customer.status = customer_data.status
 
+    after_values = {
+        "full_name": customer.full_name,
+        "email": customer.email,
+        "phone": customer.phone,
+        "date_of_birth": customer.date_of_birth,
+        "gender": customer.gender,
+        "address": customer.address,
+        "city": customer.city,
+        "state": customer.state,
+        "country": customer.country,
+        "customer_type": customer.customer_type,
+        "preferred_sales_channel": customer.preferred_sales_channel,
+        "status": customer.status,
+        "segment": customer.segment
+    }
+
     db.commit()
 
     db.refresh(customer)
@@ -517,27 +538,18 @@ def update_customer(
     
     )
     
-    ip_address = request.client.host
-
-    browser = request.headers.get("user-agent")
-
     create_audit_log(
-
         db=db,
-
         company_id=company_id,
-
         user_id=user_id,
-
         action="Customer Updated",
-
-        entity_name=customer.full_name,
-
-        ip_address=ip_address,
-
-        browser=browser
-
-
+        resource_type="Customer",
+        resource_id=customer.id,
+        description=f"Customer '{customer.full_name}' profile updated.",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent"),
+        before_values=before_values,
+        after_values=after_values
     )
 
     return customer
@@ -584,25 +596,6 @@ def delete_customer(
     
     )
 
-
-    create_audit_log(
-
-        db=db,
-
-        company_id=company_id,
-
-        user_id=user_id,
-
-        action="Customer Deleted",
-
-        entity_name=customer.full_name,
-
-        ip_address=ip_address,
-
-        browser=browser
-
-    )
-
     customer.is_deleted = True
 
     customer.status = "Inactive"
@@ -610,6 +603,18 @@ def delete_customer(
     db.commit()
     
     db.refresh(customer)
+
+    create_audit_log(
+        db=db,
+        company_id=company_id,
+        user_id=user_id,
+        action="Customer Deleted",
+        resource_type="Customer",
+        resource_id=customer.id,
+        description=f"Customer '{customer.full_name}' deleted.",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent")
+    )
 
     return {
 
@@ -643,11 +648,15 @@ def change_customer_status(
 
     )
 
-    ip_address = request.client.host
-    
-    browser = request.headers.get("user-agent")
+    before_values = {
+        "status": customer.status
+    }
 
     customer.status = status
+
+    after_values = {
+        "status": customer.status
+    }
 
     db.commit()
     
@@ -675,22 +684,17 @@ def change_customer_status(
     )
 
     create_audit_log(
-
         db=db,
-
         company_id=company_id,
-
         user_id=user_id,
-
         action=f"Customer {status}",
-
-        entity_name=customer.full_name,
-
-        ip_address=ip_address,
-
-        browser=browser
-
-
+        resource_type="Customer",
+        resource_id=customer.id,
+        description=f"Customer '{customer.full_name}' status changed to {status}.",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent"),
+        before_values=before_values,
+        after_values=after_values
     )
 
     return customer

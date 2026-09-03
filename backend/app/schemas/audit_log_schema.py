@@ -1,33 +1,66 @@
-from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
+
+
+# =========================================================
+# Create Audit Log
+# =========================================================
 
 class AuditLogCreate(BaseModel):
 
     action: str
 
-    entity_name: str | None = ""
+    resource_type: Optional[str] = None
 
-    ip_address: str | None = ""
+    resource_id: Optional[int] = None
 
-    browser: str | None = ""
+    description: Optional[str] = None
 
+    before_values: Optional[dict] = None
+
+    after_values: Optional[dict] = None
+
+    ip_address: Optional[str] = None
+
+    user_agent: Optional[str] = None
+
+    status: Optional[str] = "Success"
+
+
+# =========================================================
+# Audit Log Response
+# =========================================================
 
 class AuditLogResponse(BaseModel):
 
     id: int
 
-    entity_name: str | None
+    company_id: int
+
+    user_id: int
 
     action: str
 
-    ip_address: str | None
+    resource_type: Optional[str] = None
 
-    browser: str | None
+    resource_id: Optional[int] = None
+
+    description: Optional[str] = None
+
+    before_values: Optional[dict] = None
+
+    after_values: Optional[dict] = None
+
+    ip_address: Optional[str] = None
+
+    user_agent: Optional[str] = None
+
+    status: str
 
     created_at: datetime
 
-    user_name: str
-
-    class Config:
-
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True
+    )

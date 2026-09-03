@@ -93,9 +93,13 @@ def login_user(
         db=db,
         company_id=user.company_id,
         user_id=user.id,
-        action="User Login",
-        ip_address=request.client.host,
-        browser=request.headers.get("user-agent")
+        action="LOGIN",
+        resource_type="User",
+        resource_id=user.id,
+        description="User logged in successfully",
+        ip_address=request.client.host if request.client else "",
+        user_agent=request.headers.get("user-agent", ""),
+        status="SUCCESS"
     )
     
     return generate_tokens(db, user)
@@ -110,11 +114,15 @@ def logout_user(
         db=db,
         company_id=user.company_id,
         user_id=user.id,
-        action="User Logout",
-        ip_address=request.client.host,
-        browser=request.headers.get("user-agent")
+        action="LOGOUT",
+        resource_type="User",
+        resource_id=user.id,
+        description="User logged out successfully",
+        ip_address=request.client.host if request.client else "",
+        user_agent=request.headers.get("user-agent", ""),
+        status="SUCCESS"
     )
-
+    
     return {
         "message": "Logged out successfully."
     }
@@ -139,9 +147,13 @@ def change_user_password(
         db=db,
         company_id=user.company_id,
         user_id=user.id,
-        action="Password Changed",
+        action="PASSWORD_CHANGED",
+        resource_type="User",
+        resource_id=user.id,
+        description="User password changed successfully",
         ip_address="127.0.0.1",
-        browser="Swagger UI"
+        user_agent="Swagger UI",
+        status="SUCCESS"
     )
 
     return {
