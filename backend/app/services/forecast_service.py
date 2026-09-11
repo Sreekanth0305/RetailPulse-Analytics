@@ -209,9 +209,12 @@ def generate_forecast(
         company_id=company_id,
         user_id=user_id,
         action="Forecast Generated",
-        entity_name=forecast_period,
+        resource_type="DemandForecast",
+        resource_id=None,
+        description=f"Forecast generated for period {forecast_period}",
         ip_address=request.client.host,
-        browser=request.headers.get("user-agent")
+        user_agent=request.headers.get("user-agent"),
+        status="Success"
     )
 
     return [
@@ -265,12 +268,16 @@ def refresh_forecast(
         company_id=company_id,
         user_id=user_id,
         action="Forecast Refreshed",
-        entity_name=forecast_period,
+        resource_type="DemandForecast",
+        resource_id=None,
+        description=f"Forecast refreshed for period {forecast_period}",
         ip_address=request.client.host,
-        browser=request.headers.get("user-agent")
+        user_agent=request.headers.get("user-agent"),
+        status="Success"
     )
     
     return result
+
 def get_all_forecasts(
     db: Session,
     company_id: int,
@@ -478,9 +485,12 @@ def get_inventory_recommendations(
         company_id=company_id,
         user_id=user_id,
         action="Inventory Recommendation Generated",
-        entity_name="Forecast Recommendations",
+        resource_type="DemandForecast",
+        resource_id=None,
+        description="Inventory recommendations generated from demand forecasts",
         ip_address=request.client.host,
-        browser=request.headers.get("user-agent")
+        user_agent=request.headers.get("user-agent"),
+        status="Success"
     )
 
     return recommendations
@@ -532,9 +542,12 @@ def export_demand_forecast_csv(
         company_id=company_id,
         user_id=user_id,
         action="Forecast Exported (CSV)",
-        entity_name="Demand Forecast Report",
+        resource_type="DemandForecast",
+        resource_id=None,
+        description="Demand forecast exported as CSV",
         ip_address=request.client.host,
-        browser=request.headers.get("user-agent")
+        user_agent=request.headers.get("user-agent"),
+        status="Success"
     )
 
     return StreamingResponse(
@@ -594,9 +607,12 @@ def export_category_forecast_csv(
         company_id=company_id,
         user_id=user_id,
         action="Forecast Exported (CSV)",
-        entity_name="Category Forecast Report",
+        resource_type="CategoryForecast",
+        resource_id=None,
+        description="Category demand forecast exported as CSV",
         ip_address=request.client.host,
-        browser=request.headers.get("user-agent")
+        user_agent=request.headers.get("user-agent"),
+        status="Success"
     )
 
     return StreamingResponse(
@@ -678,9 +694,12 @@ def export_product_forecast_pdf(
         company_id=company_id,
         user_id=user_id,
         action="Forecast Exported (PDF)",
-        entity_name="Product Forecast Report",
+        resource_type="DemandForecast",
+        resource_id=None,
+        description="Product demand forecast exported as PDF",
         ip_address=request.client.host,
-        browser=request.headers.get("user-agent")
+        user_agent=request.headers.get("user-agent"),
+        status="Success"
     )
 
     return StreamingResponse(

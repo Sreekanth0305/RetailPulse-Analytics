@@ -15,7 +15,7 @@ from app.schemas.inventory_schema import (
 )
 
 from app.services.notification_service import (
-    create_notification
+    create_role_based_notifications
 )
 
 from app.services.audit_service import (
@@ -702,6 +702,13 @@ def add_stock(
     db.commit()
     db.refresh(inventory)
 
+    check_stock_notifications(
+        db,
+        company_id,
+        inventory,
+        product.name
+    )
+
     record_inventory_movement(
 
         db=db,
@@ -724,16 +731,20 @@ def add_stock(
 
     )
 
-    create_notification(
-
+    create_role_based_notifications(
         db=db,
-
         company_id=company_id,
-
+        notification_type="System Alert",
         title="Stock Added",
-
-        message=f"{data.quantity} units added."
-
+        message=f"{data.quantity} units added to {product.name}.",
+        priority="Low",
+        resource_type="Inventory",
+        resource_id=inventory.id,
+        deduplication_key=(
+            f"inventory:{inventory.id}:stock-added:"
+            f"{data.quantity}:{inventory.updated_at}"
+        ),
+        expires_in_days=1
     )
 
     create_audit_log(
@@ -851,6 +862,13 @@ def remove_stock(
     db.commit()
     db.refresh(inventory)
 
+    check_stock_notifications(
+        db,
+        company_id,
+        inventory,
+        product.name
+    )
+
     record_inventory_movement(
 
         db=db,
@@ -873,16 +891,20 @@ def remove_stock(
 
     )
 
-    create_notification(
-
+    create_role_based_notifications(
         db=db,
-
         company_id=company_id,
-
+        notification_type="System Alert",
         title="Stock Removed",
-
-        message=f"{data.quantity} units removed."
-
+        message=f"{data.quantity} units removed from {product.name}.",
+        priority="Medium",
+        resource_type="Inventory",
+        resource_id=inventory.id,
+        deduplication_key=(
+            f"inventory:{inventory.id}:stock-removed:"
+            f"{data.quantity}:{inventory.updated_at}"
+        ),
+        expires_in_days=1
     )
 
     create_audit_log(
@@ -981,6 +1003,13 @@ def adjust_stock(
     db.commit()
     db.refresh(inventory)
 
+    check_stock_notifications(
+        db,
+        company_id,
+        inventory,
+        product.name
+    )
+
     record_inventory_movement(
 
         db=db,
@@ -1009,16 +1038,20 @@ def adjust_stock(
 
     )
 
-    create_notification(
-
+    create_role_based_notifications(
         db=db,
-
         company_id=company_id,
-
+        notification_type="System Alert",
         title="Stock Adjusted",
-
-        message="Inventory adjusted manually."
-
+        message=f"Stock for {product.name} was adjusted by {data.quantity} units.",
+        priority="Medium",
+        resource_type="Inventory",
+        resource_id=inventory.id,
+        deduplication_key=(
+            f"inventory:{inventory.id}:stock-adjusted:"
+            f"{data.quantity}:{inventory.updated_at}"
+        ),
+        expires_in_days=1
     )
 
     create_audit_log(
@@ -1068,6 +1101,21 @@ def update_reorder_level(
 
     )
 
+    product = (
+        db.query(Product)
+        .filter(
+            Product.id == inventory.product_id,
+            Product.company_id == company_id
+        )
+        .first()
+    )
+    
+    if not product:
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found."
+        )
+
     if data.reorder_level < 0:
 
         raise HTTPException(
@@ -1100,6 +1148,13 @@ def update_reorder_level(
 
     db.commit()
     db.refresh(inventory)
+
+    check_stock_notifications(
+        db,
+        company_id,
+        inventory,
+        product.name
+    )
 
     create_audit_log(
         db=db,
@@ -1209,48 +1264,66 @@ def get_inventory_movements(
 # =====================================================
 
 def check_stock_notifications(
-
-    db: Session,
-
-    company_id: int,
-
-    inventory: Inventory,
-
-    product_name: str
-
+    db,
+    company_id,
+    inventory,
+    product_name
 ):
+    available_stock = inventory.available_stock
+    reorder_level = inventory.reorder_level
 
-    if inventory.available_stock == 0:
-
-        create_notification(
-
+    # 1. Stockout Risk
+    if available_stock <= 0:
+        create_role_based_notifications(
             db=db,
-
             company_id=company_id,
-
-            title="Out Of Stock",
-
-            message=f"{product_name} is Out Of Stock."
-
+            notification_type="Stockout Risk",
+            title="Stockout Risk",
+            message=f"{product_name} is out of stock.",
+            priority="Critical",
+            resource_type="Inventory",
+            resource_id=inventory.id,
+            deduplication_key=f"inventory:{inventory.id}:stockout",
+            expires_in_days=7
         )
 
-    elif inventory.available_stock <= inventory.reorder_level:
-
-        create_notification(
-
+    # 2. Low Stock
+    elif available_stock <= reorder_level:
+        create_role_based_notifications(
             db=db,
-
             company_id=company_id,
-
+            notification_type="Low Stock",
             title="Low Stock",
-
             message=(
-                f"{product_name} stock is low. "
-                f"Remaining quantity: {inventory.available_stock}"
-            )
-
+                f"{product_name} has only "
+                f"{available_stock} units available. "
+                f"Reorder level is {reorder_level}."
+            ),
+            priority="High",
+            resource_type="Inventory",
+            resource_id=inventory.id,
+            deduplication_key=f"inventory:{inventory.id}:low-stock",
+            expires_in_days=7
         )
 
+    # 3. Overstock
+    elif available_stock > (reorder_level * 4):
+        create_role_based_notifications(
+            db=db,
+            company_id=company_id,
+            notification_type="Overstock",
+            title="Overstock Alert",
+            message=(
+                f"{product_name} has {available_stock} units available, "
+                f"which is significantly above the reorder level "
+                f"of {reorder_level}."
+            ),
+            priority="Medium",
+            resource_type="Inventory",
+            resource_id=inventory.id,
+            deduplication_key=f"inventory:{inventory.id}:overstock",
+            expires_in_days=7
+        )
 
 # =====================================================
 # Update Stock Status
@@ -1329,6 +1402,21 @@ def reserve_stock(
 
     )
 
+    product = (
+        db.query(Product)
+        .filter(
+            Product.id == product_id,
+            Product.company_id == company_id
+        )
+        .first()
+    )
+    
+    if not product:
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found."
+        )
+
     if quantity > inventory.available_stock:
 
         raise HTTPException(
@@ -1349,7 +1437,7 @@ def reserve_stock(
 
         inventory,
 
-        ""
+        product.name
 
     )
 
@@ -1382,6 +1470,21 @@ def release_reserved_stock(
 
     )
 
+    product = (
+        db.query(Product)
+        .filter(
+            Product.id == product_id,
+            Product.company_id == company_id
+        )
+        .first()
+    )
+    
+    if not product:
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found."
+        )
+
     if quantity > inventory.reserved_stock:
 
         raise HTTPException(
@@ -1402,7 +1505,7 @@ def release_reserved_stock(
 
         inventory,
 
-        ""
+        product.name
 
     )
 

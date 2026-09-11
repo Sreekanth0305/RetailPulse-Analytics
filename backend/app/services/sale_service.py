@@ -34,7 +34,10 @@ from app.schemas.sale_schema import (
 )
 
 from app.services.audit_service import create_audit_log
-from app.services.notification_service import create_notification
+from app.services.notification_service import (
+    create_notification,
+    create_role_based_notifications
+)
 from app.services.customer_purchase_summary_service import update_customer_purchase_summary
 from app.services.customer_service import update_customer_segment
 from app.services.customer_timeline_service import add_customer_activity
@@ -399,9 +402,11 @@ def create_sale(
             company_id=company_id,
             user_id=user_id,
             action="Inventory Updated",
-            entity_name=product.name,
+            resource_type="Product",
+            resource_id=product.id,
+            description=f"Inventory updated for {product.name}",
             ip_address=request.client.host,
-            browser=request.headers.get("user-agent")
+            user_agent=request.headers.get("user-agent")
         )
         
         # Out Of Stock Notification
@@ -426,15 +431,40 @@ def create_sale(
                 company_id=company_id,
                 user_id=user_id,
                 action="Product Marked Out of Stock",
-                entity_name=product.name,
+                resource_type="Product",
+                resource_id=product.id,
+                description=f"Product {product.name} marked out of stock",
                 ip_address=request.client.host,
-                browser=request.headers.get("user-agent")
+                user_agent=request.headers.get("user-agent")
             )
 
 
     print("Saving Sale:", db_sale.invoice_number)
     db.commit()
     db.refresh(db_sale)
+
+    # -----------------------------
+    # Sales Alert Notification
+    # -----------------------------
+    
+    if grand_total >= 10000:
+    
+        create_role_based_notifications(
+            db=db,
+            company_id=company_id,
+            notification_type="Sales Alert",
+            title="Sales Alert",
+            message=(
+                f"Large sale completed. "
+                f"Invoice {db_sale.invoice_number} "
+                f"has a total amount of ₹{grand_total}."
+            ),
+            priority="High",
+            resource_type="Sales",
+            resource_id=db_sale.id,
+            deduplication_key=f"sale:{db_sale.id}:sales-alert",
+            expires_in_days=7
+        )
 
 # -----------------------------
 # Auto Refresh Forecast
@@ -507,10 +537,11 @@ def create_sale(
         db=db,
         company_id=company_id,
         user_id=user_id,
-        action="Sale Created",
-        entity_name=invoice_number,
-        ip_address=request.client.host,
-        browser=request.headers.get("user-agent")
+        action="SALE_CREATED",
+        resource_type="Sale",
+        resource_id=db_sale.id,
+        description="Sale created successfully",
+        user_agent=request.headers.get("user-agent")
     )
 
     return db_sale
@@ -1012,21 +1043,15 @@ def update_sale(
         )
 
     create_audit_log(
-
         db=db,
-
         company_id=company_id,
-
         user_id=user_id,
-
         action="Sale Updated",
-
-        entity_name=sale.invoice_number,
-
+        resource_type="Sale",
+        resource_id=sale.id,
+        description=f"Sale {sale.invoice_number} updated",
         ip_address=request.client.host,
-
-        browser=request.headers.get("user-agent")
-
+        user_agent=request.headers.get("user-agent")
     )
 
     return sale
@@ -1153,9 +1178,11 @@ def delete_sale(
         company_id=company_id,
         user_id=user_id,
         action="Sale Deleted",
-        entity_name=invoice,
+        resource_type="Sale",
+        resource_id=sale_id,
+        description=f"Sale {invoice} deleted",
         ip_address=request.client.host,
-        browser=request.headers.get("user-agent")
+        user_agent=request.headers.get("user-agent")
     )
     
     return {
@@ -1655,4 +1682,3 @@ def preview_invoice(
         company_id,
         sale_id
     )
-

@@ -16,6 +16,10 @@ from app.models.sale_item import SaleItem
 from app.models.import_history import ImportHistory
 from app.models.import_error import ImportErrorRecord
 
+from app.services.notification_service import (
+    create_role_based_notifications
+)
+
 
 # =========================================================
 # Required columns
@@ -1318,7 +1322,53 @@ async def process_import(
 
         db.refresh(history)
 
-
+        # =================================================
+        # CREATE IMPORT NOTIFICATION
+        # =================================================
+        
+        if history.status == "Completed":
+        
+            create_role_based_notifications(
+                db=db,
+                company_id=company_id,
+                notification_type="Import Completed",
+                title="Import Completed",
+                message=(
+                    f"{import_type.capitalize()} import "
+                    f"'{history.filename}' completed successfully. "
+                    f"{successful} records imported."
+                ),
+                priority="Low",
+                resource_type="ImportHistory",
+                resource_id=history.id,
+                deduplication_key=(
+                    f"import:{history.id}:completed"
+                ),
+                expires_in_days=7
+            )
+        
+        elif history.status == "Completed with Errors":
+        
+            create_role_based_notifications(
+                db=db,
+                company_id=company_id,
+                notification_type="Import Completed",
+                title="Import Completed with Errors",
+                message=(
+                    f"{import_type.capitalize()} import "
+                    f"'{history.filename}' completed with "
+                    f"{failed} failed and "
+                    f"{duplicate} duplicate records."
+                ),
+                priority="High",
+                resource_type="ImportHistory",
+                resource_id=history.id,
+                deduplication_key=(
+                    f"import:{history.id}:completed-errors"
+                ),
+                expires_in_days=7
+            )
+        
         return {
 
             "import_id":
@@ -1350,6 +1400,24 @@ async def process_import(
 
         db.commit()
 
+        create_role_based_notifications(
+            db=db,
+            company_id=company_id,
+            notification_type="Import Failed",
+            title="Import Failed",
+            message=(
+                f"{import_type.capitalize()} import "
+                f"'{history.filename}' failed."
+            ),
+            priority="Critical",
+            resource_type="ImportHistory",
+            resource_id=history.id,
+            deduplication_key=(
+                f"import:{history.id}:failed"
+            ),
+            expires_in_days=7
+        )
+
         raise
 
 
@@ -1360,6 +1428,25 @@ async def process_import(
         history.status = "Failed"
 
         db.commit()
+
+        create_role_based_notifications(
+            db=db,
+            company_id=company_id,
+            notification_type="Import Failed",
+            title="Import Failed",
+            message=(
+                f"{import_type.capitalize()} import "
+                f"'{history.filename}' failed due to "
+                f"an unexpected processing error."
+            ),
+            priority="Critical",
+            resource_type="ImportHistory",
+            resource_id=history.id,
+            deduplication_key=(
+                f"import:{history.id}:failed"
+            ),
+            expires_in_days=7
+        )
 
         print(
             "IMPORT ERROR:",

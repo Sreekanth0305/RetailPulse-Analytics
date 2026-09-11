@@ -12,8 +12,8 @@ export interface AuditLog {
     ip_address: string | null;
     user_agent: string | null;
     status: string;
-    before_values: string | null;
-    after_values: string | null;
+    before_values: Record<string, unknown> | null;
+    after_values: Record<string, unknown> | null;
     created_at: string;
 }
 

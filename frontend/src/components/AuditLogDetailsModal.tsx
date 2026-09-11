@@ -26,6 +26,7 @@ function AuditLogDetailsModal({
                     <h3>Audit Log Details</h3>
 
                     <button
+                        type="button"
                         className="audit-modal-close"
                         onClick={onClose}
                     >
@@ -43,7 +44,7 @@ function AuditLogDetailsModal({
 
                     <div className="audit-detail-row">
                         <strong>User:</strong>
-                        <span>{log.user_name}</span>
+                        <span>{log.user_name || `User #${log.user_id}`}</span>
                     </div>
 
                     <div className="audit-detail-row">
@@ -56,7 +57,8 @@ function AuditLogDetailsModal({
                         <span>
                             {log.resource_type
                                 ? `${log.resource_type}${
-                                    log.resource_id
+                                    log.resource_id !== null &&
+                                    log.resource_id !== undefined
                                         ? ` #${log.resource_id}`
                                         : ""
                                 }`
@@ -66,7 +68,7 @@ function AuditLogDetailsModal({
 
                     <div className="audit-detail-row">
                         <strong>Status:</strong>
-                        <span>{log.status}</span>
+                        <span>{log.status || "-"}</span>
                     </div>
 
                     <div className="audit-detail-row">
@@ -75,7 +77,7 @@ function AuditLogDetailsModal({
                     </div>
 
                     <div className="audit-detail-row">
-                        <strong>Browser:</strong>
+                        <strong>Browser / User Agent:</strong>
                         <span>{log.user_agent || "-"}</span>
                     </div>
 
@@ -102,8 +104,12 @@ function AuditLogDetailsModal({
 
                         <pre>
                             {log.before_values
-                                ? log.before_values
-                                : "-"}
+                                ? JSON.stringify(
+                                    log.before_values,
+                                    null,
+                                    2
+                                )
+                                : "No previous values"}
                         </pre>
 
                     </div>
@@ -114,8 +120,12 @@ function AuditLogDetailsModal({
 
                         <pre>
                             {log.after_values
-                                ? log.after_values
-                                : "-"}
+                                ? JSON.stringify(
+                                    log.after_values,
+                                    null,
+                                    2
+                                )
+                                : "No updated values"}
                         </pre>
 
                     </div>
