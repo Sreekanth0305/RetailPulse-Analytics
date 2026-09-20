@@ -1,7 +1,12 @@
 import axios from "../api/axios";
 
-const token = localStorage.getItem("access_token");
+const getAuthHeaders = () => {
+    const token = localStorage.getItem("access_token");
 
+    return {
+        Authorization: `Bearer ${token}`
+    };
+};
 export const getProducts = () => {
 
     return axios.get(
@@ -10,11 +15,7 @@ export const getProducts = () => {
 
         {
 
-            headers: {
-
-                Authorization: `Bearer ${token}`
-
-            }
+            headers: getAuthHeaders()
 
         }
 
@@ -32,11 +33,7 @@ export const createProduct = (data: any) => {
 
         {
 
-            headers: {
-
-                Authorization: `Bearer ${token}`
-
-            }
+            headers: getAuthHeaders()
 
         }
 
@@ -45,181 +42,98 @@ export const createProduct = (data: any) => {
 };
 
 export const updateProduct = (
-
     id: number,
-
     data: any
-
 ) => {
 
     return axios.put(
-
         `/products/${id}`,
-
         data,
-
         {
-
-            headers: {
-
-                Authorization: `Bearer ${token}`
-
-            }
-
+            headers: getAuthHeaders()
         }
-
     );
 
 };
 
 export const deleteProduct = (
-
     id: number
-
 ) => {
 
     return axios.delete(
-
         `/products/${id}`,
-
         {
-
-            headers: {
-
-                Authorization: `Bearer ${token}`
-
-            }
-
+            headers: getAuthHeaders()
         }
-
     );
 
 };
 
 export const searchProduct = (
-
     keyword: string
-
 ) => {
 
     return axios.get(
-
         `/products/search?keyword=${keyword}`,
-
         {
-
-            headers: {
-
-                Authorization: `Bearer ${token}`
-
-            }
-
+            headers: getAuthHeaders()
         }
-
     );
 
 };
 
 export const filterProduct = (
-
     categoryId: string,
-
     brand: string,
-
     status: string
-
 ) => {
 
     return axios.get(
-
         `/products/filter?category_id=${categoryId}&brand=${brand}&status=${status}`,
-
         {
-
-            headers: {
-
-                Authorization: `Bearer ${token}`
-
-            }
-
+            headers: getAuthHeaders()
         }
-
     );
 
 };
 
 export const activateProduct = (
-
     id: number
-
 ) => {
 
     return axios.patch(
-
         `/products/${id}/activate`,
-
         {},
-
         {
-
-            headers: {
-
-                Authorization: `Bearer ${token}`
-
-            }
-
+            headers: getAuthHeaders()
         }
-
     );
 
 };
 
 export const deactivateProduct = (
-
     id: number
-
 ) => {
 
     return axios.patch(
-
         `/products/${id}/deactivate`,
-
         {},
-
         {
-
-            headers: {
-
-                Authorization: `Bearer ${token}`
-
-            }
-
+            headers: getAuthHeaders()
         }
-
     );
 
 };
 
 export const sortProduct = (
-
     sortBy: string
-
 ) => {
 
     return axios.get(
-
         `/products/sort?sort_by=${sortBy}`,
-
         {
-
-            headers: {
-
-                Authorization: `Bearer ${token}`
-
-            }
-
+            headers: getAuthHeaders()
         }
-
     );
 
 };

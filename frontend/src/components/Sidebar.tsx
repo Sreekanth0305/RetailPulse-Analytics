@@ -15,7 +15,8 @@ import {
   Group,
   TrendingUp,
   AllInbox,
-  UploadFile
+  UploadFile,
+  Assessment
 } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
@@ -141,6 +142,14 @@ function Sidebar() {
           <UploadFile />
         
           <span>Data Import</span>
+        
+        </li>
+
+        <li onClick={() => navigate("/reporting")}>
+
+          <Assessment />
+        
+          <span>Reporting</span>
         
         </li>
 

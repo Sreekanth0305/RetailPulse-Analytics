@@ -13,3 +13,5 @@ from .inventory_movement import InventoryMovement
 from .customer_timeline import CustomerTimeline
 from .demand_forecast import DemandForecast
 from .forecast_history import ForecastHistory
+from app.models.report_history import ReportHistory
+from app.models.scheduled_report import ScheduledReport

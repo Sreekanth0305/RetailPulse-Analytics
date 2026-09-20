@@ -18,7 +18,7 @@ class UserResponse(BaseModel):
     role: str
     status: str
     last_login: datetime | None
-    created_at: datetime
+    created_at: datetime | None
 
     class Config:
         from_attributes = True

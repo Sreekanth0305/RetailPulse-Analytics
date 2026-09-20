@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -36,13 +37,30 @@ from app.routes.customer_timeline_routes import router as customer_timeline_rout
 from app.routes.forecast_routes import router as forecast_router
 from app.routes.inventory_forecast_routes import router as inventory_forecast_router
 from app.routes.import_routes import router as import_router
+from app.routes.report_routes import router as report_router
+from app.routes.scheduled_report_routes import (router as scheduled_report_router)
+from app.services.scheduler_service import (
+    start_scheduler,
+    stop_scheduler
+)
 
 
 Base.metadata.create_all(bind=engine)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    start_scheduler()
+
+    yield
+
+    stop_scheduler()
+
+
 app = FastAPI(
     title="RetailPulse Analytics",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 app.add_middleware(
@@ -81,3 +99,5 @@ app.include_router(customer_profile_router)
 app.include_router(customer_timeline_router)
 app.include_router(forecast_router)
 app.include_router(import_router)
+app.include_router(report_router)
+app.include_router(scheduled_report_router)
