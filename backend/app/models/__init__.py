@@ -15,3 +15,5 @@ from .demand_forecast import DemandForecast
 from .forecast_history import ForecastHistory
 from app.models.report_history import ReportHistory
 from app.models.scheduled_report import ScheduledReport
+from app.models.data_quality_issue import DataQualityIssue
+from app.models.reconciliation_history import ReconciliationHistory

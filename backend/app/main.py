@@ -39,6 +39,7 @@ from app.routes.inventory_forecast_routes import router as inventory_forecast_ro
 from app.routes.import_routes import router as import_router
 from app.routes.report_routes import router as report_router
 from app.routes.scheduled_report_routes import (router as scheduled_report_router)
+from app.routes.data_quality_routes import router as data_quality_router
 from app.services.scheduler_service import (
     start_scheduler,
     stop_scheduler
@@ -101,3 +102,4 @@ app.include_router(forecast_router)
 app.include_router(import_router)
 app.include_router(report_router)
 app.include_router(scheduled_report_router)
+app.include_router(data_quality_router)

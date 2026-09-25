@@ -16,7 +16,8 @@ import {
   TrendingUp,
   AllInbox,
   UploadFile,
-  Assessment
+  Assessment,
+  FactCheck
 } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
@@ -150,6 +151,14 @@ function Sidebar() {
           <Assessment />
         
           <span>Reporting</span>
+        
+        </li>
+
+        <li onClick={() => navigate("/data-quality")}>
+
+          <FactCheck />
+        
+          <span>Data Quality</span>
         
         </li>
 
