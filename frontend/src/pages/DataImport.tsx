@@ -26,9 +26,13 @@ import type { SelectChangeEvent } from "@mui/material";
 import {
   getImportErrors,
   getImportHistory,
+  getImportStatus,
   processImport,
   uploadImport,
   validateImport,
+  downloadImportTemplate,
+  downloadImportErrors,
+  cancelImport
 } from "../services/importService";
 
 import "../styles/dataImport.css";
@@ -36,6 +40,7 @@ import "../styles/dataImport.css";
 
 type ImportType =
   | "products"
+  | "inventory"
   | "customers"
   | "sales";
 
@@ -82,6 +87,19 @@ interface ImportHistory {
   completed_at?: string;
 }
 
+interface ImportStatus {
+  import_id: number;
+  status: string;
+  total_records: number;
+  successful_records: number;
+  failed_records: number;
+  duplicate_records: number;
+  processed_records: number;
+  progress: number;
+  created_at: string;
+  completed_at?: string;
+}
+
 
 export default function DataImport() {
 
@@ -102,6 +120,12 @@ export default function DataImport() {
 
   const [errorRecords, setErrorRecords] =
     useState<any[]>([]);
+
+  const [importStatus, setImportStatus] =
+    useState<ImportStatus | null>(null);
+
+  const [selectedErrorImportId, setSelectedErrorImportId] =
+    useState<number | null>(null);
 
   const [loading, setLoading] =
     useState(false);
@@ -343,7 +367,11 @@ export default function DataImport() {
         );
 
       setMessage(
-        `Import completed: ${result.status}`
+        result.message
+      );
+
+      await trackImportProgress(
+        uploadResult.import_id
       );
 
       await loadHistory();
@@ -360,6 +388,131 @@ export default function DataImport() {
       setLoading(false);
     }
   };
+
+// =========================================================
+// Processing Status
+// =========================================================
+
+const handleCheckStatus = async (
+  importId: number
+) => {
+
+  try {
+
+    setError("");
+
+    const result =
+      await getImportStatus(importId);
+
+    setImportStatus(result);
+
+  } catch (err) {
+
+    console.error(
+      "Failed to load import status",
+      err
+    );
+
+    setError(
+      "Unable to load import status."
+    );
+  }
+};
+
+// =========================================================
+// Track Import Progress
+// =========================================================
+
+const trackImportProgress = async (
+  importId: number
+) => {
+
+  const checkStatus = async () => {
+
+    try {
+
+      const result =
+        await getImportStatus(importId);
+
+      setImportStatus(result);
+
+      if (
+        result.status === "Processing"
+      ) {
+
+        setTimeout(
+          checkStatus,
+          1000
+        );
+
+      } else {
+
+        await loadHistory();
+
+        if (
+          result.status === "Completed"
+        ) {
+
+          setMessage(
+            "Import completed successfully."
+          );
+
+        } else if (
+          result.status === "Completed with Errors"
+        ) {
+
+          setMessage(
+            "Import completed with errors."
+          );
+
+        } else if (
+          result.status === "Failed"
+        ) {
+
+          setError(
+            "Import processing failed."
+          );
+        }
+      }
+
+    } catch (err) {
+
+      console.error(
+        "Failed to track import progress",
+        err
+      );
+
+      setError(
+        "Unable to track import progress."
+      );
+    }
+  };
+
+  await checkStatus();
+};
+
+  // =========================================================
+  // Download Template
+  // =========================================================
+
+  const handleDownloadTemplate = async () => {
+    try {
+        setError("");
+        setMessage("");
+
+        await downloadImportTemplate(importType);
+
+        setMessage(
+            `${importType} import template downloaded successfully.`
+        );
+    } catch (err) {
+        console.error(err);
+
+        setError(
+            "Failed to download import template."
+        );
+    }
+};
 
 
   // =========================================================
@@ -395,12 +548,18 @@ export default function DataImport() {
 
     try {
 
+      setError("");
+
       const result =
         await getImportErrors(
           importId
         );
 
       setErrorRecords(result);
+
+      setSelectedErrorImportId(
+        importId
+      );
 
     } catch (err) {
 
@@ -409,6 +568,79 @@ export default function DataImport() {
       );
     }
   };
+
+  // =========================================================
+  // Download Error CSV
+  // =========================================================
+  
+  const handleDownloadErrors = async (
+    importId: number
+  ) => {
+  
+    try {
+  
+      setError("");
+      setMessage("");
+  
+      await downloadImportErrors(
+        importId
+      );
+  
+      setMessage(
+        `Error report for Import ID ${importId} downloaded successfully.`
+      );
+  
+    } catch (err: any) {
+  
+      console.error(
+        "Failed to download error report",
+        err
+      );
+  
+      setError(
+        err.response?.data?.detail ||
+        "Failed to download error report."
+      );
+    }
+  };
+
+  // =========================================================
+  // Cancel Import
+  // =========================================================
+  
+
+  const handleCancelImport = async (
+  importId: number
+) => {
+
+  try {
+
+    setError("");
+    setMessage("");
+
+    await cancelImport(importId);
+
+    setMessage(
+      `Import ID ${importId} cancelled successfully.`
+    );
+
+    await loadHistory();
+
+    setImportStatus(null);
+
+  } catch (err: any) {
+
+    console.error(
+      "Failed to cancel import",
+      err
+    );
+
+    setError(
+      err.response?.data?.detail ||
+      "Failed to cancel import."
+    );
+  }
+};
 
 
   // =========================================================
@@ -483,7 +715,11 @@ export default function DataImport() {
                   >
 
                     <MenuItem value="products">
-                      Products
+                      products
+                    </MenuItem>
+
+                    <MenuItem value="inventory">
+                        Inventory
                     </MenuItem>
 
                     <MenuItem value="customers">
@@ -528,6 +764,15 @@ export default function DataImport() {
 
 
               <div className="import-actions">
+
+                <Button
+                  className="data-import-btn"
+                  variant="contained"
+                  onClick={handleDownloadTemplate}
+                  disabled={loading}
+                >
+                  Download Template
+                </Button>
 
                 <Button
                   className="data-import-btn"
@@ -988,14 +1233,26 @@ export default function DataImport() {
                               className="table-action-btn"
                               size="small"
                               onClick={() =>
+                                handleCheckStatus(
+                                  item.id
+                                )
+                              }
+                            >
+                              Status
+                            </Button>
+                          
+                            <Button
+                              className="table-action-btn"
+                              size="small"
+                              onClick={() =>
                                 handleViewErrors(
                                   item.id
                                 )
                               }
                             >
-                              View
+                              Errors
                             </Button>
-
+                          
                           </TableCell>
 
                         </TableRow>
@@ -1013,6 +1270,100 @@ export default function DataImport() {
 
           </Card>
 
+          {/* =====================================================
+              Processing Status
+          ===================================================== */}
+          
+          {importStatus && (
+          
+            <Card className="import-card">
+          
+              <CardContent>
+          
+                <h2 className="import-card-title">
+                  Import Processing Status
+                </h2>
+          
+                <div className="import-details">
+          
+                  <p>
+                    Import ID:{" "}
+                    <strong>
+                      {importStatus.import_id}
+                    </strong>
+                  </p>
+          
+                  <p>
+                    Status:{" "}
+                    <strong>
+                      {importStatus.status}
+                    </strong>
+                  </p>
+          
+                  <p>
+                    Total Records:{" "}
+                    <strong>
+                      {importStatus.total_records}
+                    </strong>
+                  </p>
+          
+                  <p>
+                    Processed Records:{" "}
+                    <strong>
+                      {importStatus.processed_records}
+                    </strong>
+                  </p>
+          
+                  <p>
+                    Successful Records:{" "}
+                    <strong>
+                      {importStatus.successful_records}
+                    </strong>
+                  </p>
+          
+                  <p>
+                    Failed Records:{" "}
+                    <strong>
+                      {importStatus.failed_records}
+                    </strong>
+                  </p>
+          
+                  <p>
+                    Duplicate Records:{" "}
+                    <strong>
+                      {importStatus.duplicate_records}
+                    </strong>
+                  </p>
+          
+                  <p>
+                    Progress:{" "}
+                    <strong>
+                      {importStatus.progress}%
+                    </strong>
+                  </p>
+          
+                </div>
+
+                {importStatus.status === "Processing" && (
+                  <Button
+                    className="data-import-btn"
+                    variant="contained"
+                    onClick={() =>
+                      handleCancelImport(
+                        importStatus.import_id
+                      )
+                    }
+                  >
+                    Cancel Import
+                  </Button>
+                )}
+          
+              </CardContent>
+          
+            </Card>
+          
+          )}
+
 
           {/* =====================================================
               Error Details
@@ -1024,9 +1375,27 @@ export default function DataImport() {
 
               <CardContent>
 
+                <div className="import-errors-header">
+
                 <h2 className="import-card-title">
                   Import Errors
                 </h2>
+              
+                {selectedErrorImportId !== null && (
+                  <Button
+                    className="data-import-btn"
+                    variant="contained"
+                    onClick={() =>
+                      handleDownloadErrors(
+                        selectedErrorImportId
+                      )
+                    }
+                  >
+                    Download Error CSV
+                  </Button>
+                )}
+              
+              </div>
 
 
                 <div className="import-table-wrapper">

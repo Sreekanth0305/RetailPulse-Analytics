@@ -154,3 +154,107 @@ export const getImportErrors = async (
 
   return response.data;
 };
+
+// =========================================================
+// Download Import Error CSV
+// GET /api/import/{import_id}/errors/download
+// =========================================================
+
+export const downloadImportErrors = async (
+  importId: number
+): Promise<void> => {
+
+  const response = await axios.get(
+    `/api/import/${importId}/errors/download`,
+    {
+      headers: getAuthHeaders(),
+      responseType: "blob",
+    }
+  );
+
+  const blob = new Blob(
+    [response.data],
+    { type: "text/csv" }
+  );
+
+  const url =
+    window.URL.createObjectURL(blob);
+
+  const link =
+    document.createElement("a");
+
+  link.href = url;
+
+  link.download =
+    `import_${importId}_error_report.csv`;
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  document.body.removeChild(link);
+
+  window.URL.revokeObjectURL(url);
+};
+
+export const downloadImportTemplate = async (
+    importType: string
+): Promise<void> => {
+    const response = await axios.get(
+        `/api/import/templates/${importType}`,
+        {
+            headers: getAuthHeaders(),
+            responseType: "blob"
+        }
+    );
+
+    const blob = new Blob(
+        [response.data],
+        { type: "text/csv" }
+    );
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+
+    link.download = `${importType}_import_template.csv`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+};
+
+export const getImportStatus = async (
+    importId: number
+) => {
+
+    const response = await axios.get(
+        `/api/import/${importId}/status`,
+        {
+          headers: getAuthHeaders(),
+        }
+    );
+
+    return response.data;
+};
+
+export const cancelImport = async (
+  importId: number
+) => {
+
+  const response = await axios.post(
+    `/api/import/${importId}/cancel`,
+    {},
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  return response.data;
+};

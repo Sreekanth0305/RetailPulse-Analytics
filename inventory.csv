@@ -1,0 +1,5 @@
+SKU,Current Stock,Reserved Stock,Reorder Level
+SKU001,100,10,20
+SKU002,50,5,10
+SKU001,80,5,20
+SKU003,0,0,5
