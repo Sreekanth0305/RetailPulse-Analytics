@@ -17,7 +17,8 @@ import {
   AllInbox,
   UploadFile,
   Assessment,
-  FactCheck
+  FactCheck,
+  Approval
 } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
@@ -159,6 +160,14 @@ function Sidebar() {
           <FactCheck />
         
           <span>Data Quality</span>
+        
+        </li>
+
+        <li onClick={() => navigate("/workflows")}>
+
+          <Approval />
+        
+          <span>Workflows</span>
         
         </li>
 

@@ -19,6 +19,7 @@ import InventoryForecast from "../pages/InventoryForecast";
 import DataImport from "../pages/DataImport";
 import Reporting from "../pages/Reporting";
 import DataQuality from "../pages/DataQuality";
+import Workflows from "../pages/Workflows";
 
 export default function AppRoutes() {
   return (
@@ -42,6 +43,7 @@ export default function AppRoutes() {
         <Route path="/data-import"element={<DataImport />}/>
         <Route path="/reporting" element={<Reporting />} />
         <Route path="/data-quality"element={<DataQuality />}/>
+        <Route path="/workflows" element={<Workflows />}/>
 
         <Route path="/customer-profile/:customerId" element={<CustomerProfile />}/>
       </Routes>
